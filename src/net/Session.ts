@@ -3,7 +3,15 @@ import { TRACKS } from "../data/tracks";
 import { cleanName, cleanVisual, type Visual } from "../core/Save";
 import type { RaceConfig, NetPlayer } from "../game/RaceManager";
 import type { Snapshot } from "../game/RemoteCar";
-import { LocalHub, RtcLink, type Link } from "./Link";
+import {
+  hasRelay,
+  iceServers,
+  LocalHub,
+  PeerLink,
+  RtcLink,
+  type BrokeredConnection,
+  type Link,
+} from "./Link";
 export const PROTOCOL = 1;
 export const MAX_PLAYERS = 6;
 export interface LobbyPlayer {
@@ -42,6 +50,59 @@ const tuple = <N extends number>(v: unknown, n: N) =>
   (Array.isArray(v) && v.length === n
     ? v.map((x) => finite(x))
     : Array(n).fill(0)) as never;
+/** Room codes avoid look-alike characters (0/O, 1/I) so they survive being read aloud. */
+const ROOM_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+export const ROOM_LENGTH = 6;
+const ROOM_PREFIX = "velox-room-";
+export const cleanRoomCode = (text: string) =>
+  text.toUpperCase().replace(/[^A-Z0-9]/g, "");
+export const isRoomCode = (code: string) =>
+  code.length === ROOM_LENGTH && [...code].every((c) => ROOM_ALPHABET.includes(c));
+const newRoomCode = () =>
+  Array.from(
+    crypto.getRandomValues(new Uint8Array(ROOM_LENGTH)),
+    (b) => ROOM_ALPHABET[b % ROOM_ALPHABET.length],
+  ).join("");
+/** The PeerJS broker object, typed loosely so the library loads only when needed. */
+interface Broker {
+  destroyed: boolean;
+  disconnected: boolean;
+  on(event: string, fn: (arg: never) => void): unknown;
+  once(event: string, fn: (arg: never) => void): unknown;
+  connect(id: string, options: object): BrokeredConnection;
+  reconnect(): void;
+  destroy(): void;
+}
+const brokerError = (e: unknown) => {
+  const type = (e as { type?: string })?.type ?? "";
+  if (type === "peer-unavailable")
+    return "No room with that code. Check it with your host.";
+  if (type === "browser-incompatible")
+    return "This browser cannot play online. Try Chrome, Edge or Firefox.";
+  return "Cannot reach the room server. Check your internet connection.";
+};
+async function openBroker(id?: string) {
+  const { default: Peer } = await import("peerjs");
+  const config = { iceServers: await iceServers() };
+  return new Promise<Broker>((resolve, reject) => {
+    const peer = (
+      id ? new Peer(id, { config, debug: 0 }) : new Peer({ config, debug: 0 })
+    ) as unknown as Broker;
+    const timer = setTimeout(() => {
+      peer.destroy();
+      reject({ type: "network" });
+    }, 12000);
+    peer.once("open", () => {
+      clearTimeout(timer);
+      resolve(peer);
+    });
+    peer.once("error", (e) => {
+      clearTimeout(timer);
+      peer.destroy();
+      reject(e);
+    });
+  });
+}
 export const randomId = () =>
   Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) =>
     b.toString(16).padStart(2, "0"),
@@ -139,7 +200,7 @@ export class NetSession {
   async createInvite() {
     if (this.players.length + this.pendingCount() >= MAX_PLAYERS)
       throw new Error(`The grid is full (${MAX_PLAYERS} players).`);
-    const link = new RtcLink();
+    const link = new RtcLink(await iceServers());
     const code = await link.createOffer(this.selfId);
     this.pending.add(link);
     return {
@@ -161,10 +222,90 @@ export class NetSession {
   }
   /** Guest: answer an invite. Resolves to the reply code the host must paste. */
   async answerInvite(code: string) {
-    const link = new RtcLink();
+    const link = new RtcLink(await iceServers());
     const reply = await link.acceptOffer(code, this.selfId);
     this.adopt(link, "host");
     return reply;
+  }
+  /** Short code friends type to join, once the room is registered. */
+  roomCode = "";
+  roomError = "";
+  private broker: Broker | null = null;
+  /** Host: register a room code on the public PeerJS broker. It only introduces peers. */
+  async openOnlineRoom() {
+    for (let attempt = 0; !this.closed; attempt++) {
+      const code = newRoomCode();
+      try {
+        const peer = await openBroker(ROOM_PREFIX + code);
+        if (this.closed) {
+          peer.destroy();
+          return;
+        }
+        this.broker = peer;
+        this.roomCode = code;
+        this.roomError = "";
+        peer.on("connection", (conn: BrokeredConnection & { metadata?: { id?: unknown } }) => {
+          const asked = conn.metadata?.id,
+            id =
+              typeof asked === "string" && /^[0-9a-f]{12}$/.test(asked) && !this.links.has(asked)
+                ? asked
+                : randomId();
+          if (this.players.length + this.pendingCount() >= MAX_PLAYERS) {
+            conn.close();
+            return;
+          }
+          this.adopt(new PeerLink(conn, id), id);
+        });
+        // The broker drops idle sockets; reconnect so new friends can still join.
+        peer.on("disconnected", () =>
+          setTimeout(() => {
+            if (!this.closed && !peer.destroyed && peer.disconnected) peer.reconnect();
+          }, 2000),
+        );
+        peer.on("error", () => {});
+        this.onChange();
+        return;
+      } catch (e) {
+        if ((e as { type?: string })?.type !== "unavailable-id" || attempt >= 3) {
+          this.roomError = brokerError(e);
+          this.onChange();
+          return;
+        }
+      }
+    }
+  }
+  /** Guest: join a host's room by its short code. */
+  async joinOnlineRoom(text: string) {
+    const code = cleanRoomCode(text);
+    if (!isRoomCode(code))
+      throw new Error(`Room codes are ${ROOM_LENGTH} letters and numbers.`);
+    this.roomCode = code;
+    let peer: Broker;
+    try {
+      peer = await openBroker();
+    } catch (e) {
+      throw new Error(brokerError(e));
+    }
+    if (this.closed) {
+      peer.destroy();
+      return;
+    }
+    this.broker = peer;
+    peer.on("error", (e) => this.close(brokerError(e)));
+    const conn = peer.connect(ROOM_PREFIX + code, {
+      reliable: true,
+      serialization: "raw",
+      metadata: { id: this.selfId },
+    });
+    this.adopt(new PeerLink(conn, "host"), "host");
+    setTimeout(() => {
+      if (this.connected || this.closed) return;
+      this.close(
+        hasRelay()
+          ? "Could not connect to the host. Check both connections and try again."
+          : "Found the room but could not connect. One of you is on a strict network (often mobile data). Try both on home Wi-Fi.",
+      );
+    }, 20000);
   }
   /** Host: allow guests from other tabs of this browser to join by room code. */
   openLocalRoom() {
@@ -536,6 +677,7 @@ export class NetSession {
     for (const l of this.pending) l.close();
     for (const l of [...this.links.values()]) l.close();
     this.hub?.close();
+    this.broker?.destroy();
     this.links.clear();
     this.onClosed(reason);
   }

@@ -46,7 +46,8 @@ import {
 } from "../game/RaceManager";
 import { TUNING } from "../data/tuning";
 import { Screens, fmt, formatTime, formatDelta, esc } from "../ui/Screens";
-import { NetSession, type NetConfig } from "../net/Session";
+import { cleanRoomCode, NetSession, type NetConfig } from "../net/Session";
+import { checkNetwork, type NetworkKind } from "../net/Link";
 import type { NetPlayer } from "../game/RaceManager";
 const MENU_STATES: State[] = [
   "title",
@@ -108,7 +109,14 @@ export class Game {
     accept: null as null | ((reply: string) => Promise<void>),
     guest: null as NetSession | null,
     cancel: null as null | (() => void),
+    /** Manual copy-paste codes (works with no room server) are tucked away. */
+    manual: false,
+    network: "" as "" | "checking" | NetworkKind,
   };
+  /** Room code from an invite link (?room=CODE), joined once the player is in. */
+  pendingRoom = cleanRoomCode(
+    new URLSearchParams(location.search).get("room") ?? "",
+  );
   chatLog: { name: string; text: string }[] = [];
   lastUnlocks: Achievement[] = [];
   dailyResult = "";
@@ -364,6 +372,18 @@ export class Game {
         () => this.app.classList.remove("screen-enter"),
         240,
       );
+    if (this.pendingRoom && state === "menu" && previous === "title")
+      queueMicrotask(() => this.machine.go("lobby"));
+    if (this.pendingRoom && state === "lobby" && !this.net) {
+      const code = this.pendingRoom;
+      this.pendingRoom = "";
+      history.replaceState(null, "", location.pathname);
+      setTimeout(() => {
+        const input = document.getElementById("join-code") as HTMLInputElement;
+        if (input) input.value = code;
+        void this.netAction("net-join");
+      });
+    }
     if (MENU_STATES.includes(state)) {
       this.skipIntro = false;
       this.renderer.setStage(
@@ -513,7 +533,7 @@ export class Game {
               pause: '[data-action="resume"]',
               results: ".result-actions .primary",
               lobby:
-                '.lobby-entry button:not([disabled]),[data-action="net-ready"],.lobby-grid [data-control="net-mode"]',
+                '#join-code:not([disabled]),[data-action="net-ready"],[data-action="copy-link"],.net-entry button:not([disabled])',
             } as Record<string, string>
           )[s] ??
             "main button:not(.back-link):not([disabled]),main input:not([type=hidden])",
@@ -1153,6 +1173,12 @@ export class Game {
       t.value = "";
     }
     if (t.id === "driver-name" && e.key === "Enter") t.blur();
+    if (t.id === "join-code" && e.key === "Enter") void this.netAction("net-join");
+    if (t.id === "join-code" && e.key !== "Enter")
+      requestAnimationFrame(() => {
+        const clean = cleanRoomCode(t.value);
+        if (clean !== t.value) t.value = clean;
+      });
   }
   confirmReset() {
     this.app.insertAdjacentHTML(
@@ -2086,7 +2112,12 @@ export class Game {
     this.net = n;
     this.chatLog = [];
     const roster = () =>
-      JSON.stringify([n.players.map(({ ping, ...p }) => p), n.config]);
+      JSON.stringify([
+        n.players.map(({ ping, ...p }) => p),
+        n.config,
+        n.roomCode,
+        n.roomError,
+      ]);
     let previousRoster = roster();
     n.onChange = () => {
       const next = roster(),
@@ -2171,6 +2202,25 @@ export class Game {
       (document.getElementById(id) as HTMLInputElement | null)?.value ?? ""
     );
   }
+  /** Guest session that becomes `this.net` once the host's roster arrives. */
+  private startGuest() {
+    const ui = this.netUI;
+    ui.guest?.close();
+    const n = (ui.guest = NetSession.guest(this.sessionProfile()));
+    this.attachSession(n);
+    this.net = null; // stays on the entry view until connected
+    const previousChange = n.onChange;
+    n.onChange = () => {
+      if (!this.net) {
+        this.net = n;
+        ui.reply = "";
+        ui.busy = false;
+        this.audio.sfx("join");
+      }
+      previousChange();
+    };
+    return n;
+  }
   private async netAction(a: string) {
     const ui = this.netUI;
     try {
@@ -2184,26 +2234,23 @@ export class Game {
         });
         this.attachSession(n);
         n.openLocalRoom();
+        void n.openOnlineRoom();
         this.screen();
       }
       if (a === "net-join") {
-        const code = this.value("invite-code").trim();
-        if (!code) throw new Error("Paste the invite code first.");
-        ui.guest?.close();
+        const code = cleanRoomCode(this.value("join-code"));
+        if (!code) throw new Error("Type the room code from your host.");
         ui.busy = true;
         this.screen();
-        const n = (ui.guest = NetSession.guest(this.sessionProfile()));
-        this.attachSession(n);
-        this.net = null; // stays on the entry view until connected
-        const previousChange = n.onChange;
-        n.onChange = () => {
-          if (!this.net) {
-            this.net = n;
-            ui.reply = "";
-            this.audio.sfx("join");
-          }
-          previousChange();
-        };
+        const n = this.startGuest();
+        await n.joinOnlineRoom(code);
+      }
+      if (a === "net-join-manual") {
+        const code = this.value("invite-code").trim();
+        if (!code) throw new Error("Paste the invite code first.");
+        ui.busy = true;
+        this.screen();
+        const n = this.startGuest();
         ui.reply = await n.answerInvite(code);
         ui.busy = false;
         this.screen();
@@ -2212,20 +2259,46 @@ export class Game {
         const room = this.value("room-code").trim();
         if (!/^[A-Za-z]{3}$/.test(room))
           throw new Error("Enter the three room letters.");
-        ui.guest?.close();
-        const n = (ui.guest = NetSession.guest(this.sessionProfile()));
-        this.attachSession(n);
-        this.net = null;
-        const previousChange = n.onChange;
-        n.onChange = () => {
-          if (!this.net) {
-            this.net = n;
-            this.audio.sfx("join");
-          }
-          previousChange();
-        };
-        n.joinLocalRoom(room);
+        this.startGuest().joinLocalRoom(room);
         this.toast(`Looking for room ${room.toUpperCase()}…`);
+      }
+      if (a === "net-manual") {
+        ui.manual = !ui.manual;
+        this.screen();
+      }
+      if (a === "net-cancel-join") {
+        ui.guest?.close();
+        ui.guest = null;
+        ui.busy = false;
+        ui.reply = "";
+        this.screen();
+      }
+      if (a === "net-check") {
+        ui.network = "checking";
+        this.screen();
+        ui.network = await checkNetwork();
+        if (this.machine.current === "lobby") this.screen();
+      }
+      if ((a === "copy-room" || a === "copy-link") && this.net?.roomCode) {
+        const code = this.net.roomCode,
+          text =
+            a === "copy-room"
+              ? code
+              : `${location.origin}${location.pathname}?room=${code}`;
+        await navigator.clipboard.writeText(text).then(
+          () => {
+            this.toast(
+              a === "copy-room"
+                ? `Room code ${code} copied.`
+                : "Invite link copied. Send it to your friends.",
+            );
+            const button = this.app.querySelector<HTMLElement>(
+              `[data-action="${a}"]`,
+            );
+            if (button) button.textContent = "COPIED ✓";
+          },
+          () => this.toast(`Room code: ${code}`),
+        );
       }
       if (a === "net-invite" && this.net?.isHost) {
         ui.busy = true;
@@ -2275,6 +2348,16 @@ export class Game {
           },
         );
       }
+      if (
+        (a === "net-track-prev" || a === "net-track-next") &&
+        this.net?.isHost
+      ) {
+        const i = TRACKS.findIndex((t) => t.id === this.net!.config.track),
+          step = a === "net-track-next" ? 1 : -1;
+        this.net.setConfig({
+          track: TRACKS[(i + step + TRACKS.length) % TRACKS.length].id,
+        });
+      }
       if (a === "net-ready" && this.net) {
         this.net.setReady(!this.net.self?.ready);
       }
@@ -2292,6 +2375,10 @@ export class Game {
       }
     } catch (e) {
       ui.busy = false;
+      if (a === "net-join" && !this.net) {
+        ui.guest?.close();
+        ui.guest = null;
+      }
       this.audio.sfx("error");
       this.toast(
         e instanceof Error ? e.message : "Connection failed. Try a new code.",

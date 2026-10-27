@@ -1,5 +1,12 @@
 # VELOX changelog
 
+## 0.9.0 — Online room codes
+
+- Online play uses a six-character room code instead of copying long codes back and forth. The host shares the code or an invite link (`?room=CODE`); friends type the code (or open the link) and join. One code admits up to five friends. The public PeerJS server only introduces the players; race data still flows directly between browsers.
+- New layout: the entry page has large HOST and JOIN cards, a network check (OPEN / STRICT / BLOCKED) and the older manual codes and same-browser room under OTHER WAYS TO CONNECT. The meet-up gives the race settings the centre with a large map and track arrows, the room code and driver slots on the left, and chat on the right, all without scrolling at 1280x720 and up.
+- Clear errors for a mistyped code, an unreachable room server, and a room that cannot be reached directly (strict mobile networks).
+- Builds can add TURN relays through `VITE_TURN_URL`, an endpoint returning a list of ICE servers (for example Metered's credentials URL), so players behind carrier-grade NAT can still connect.
+
 ## 0.8.1 — Tunnel and garage polish
 
 - Tunnels: no street lamps or road light pools inside or at the portals, and the ceiling light strips sit beside the crown instead of at camera height (where they read as a bright band across the screen).

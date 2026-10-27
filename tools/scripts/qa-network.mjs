@@ -3,11 +3,11 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 const browser = await chromium.launch({ headless: true, channel: "chrome" }),
   report = [];
-const url = process.env.VELOX_URL ?? "http://127.0.0.1:5176";
+const url = process.env.VELOX_URL ?? "http://127.0.0.1:5174";
 try {
   for (const transport of process.argv.includes("--invite-only")
     ? ["invite"]
-    : ["room", "invite"]) {
+    : (process.env.VELOX_TRANSPORTS ?? "online,room,invite").split(",")) {
     const context = await browser.newContext({
         viewport: { width: 1366, height: 768 },
       }),
@@ -31,19 +31,30 @@ try {
       g.click("net-host", document.body);
     });
     await host.bringToFront();
-    if (transport === "room") {
+    if (transport === "online") {
+      // Room code through the public PeerJS broker, typed into the join box.
+      await host.waitForFunction(() => window.__velox.net.roomCode.length === 6, null, { timeout: 20000 });
+      const code = await host.evaluate(() => window.__velox.net.roomCode);
+      await host.screenshot({ path: "test-results/net-room-host.png" });
+      await guest.bringToFront();
+      await guest.locator("#join-code").fill(code.toLowerCase());
+      await guest.locator("#join-code").press("Enter");
+    } else if (transport === "room") {
       const room = await host.evaluate(() => window.__velox.net.localRoom);
       await guest.bringToFront();
+      await guest.locator("[data-action=net-manual]").click();
       await guest.locator("#room-code").fill(room);
       await guest.locator("[data-action=net-local]").click();
     } else {
+      await host.locator(".manual-invite summary").click();
       await host.locator("[data-action=net-invite]").click();
       await host.waitForFunction(() => window.__velox.netUI.invite.length > 20);
       const code = await host.evaluate(() => window.__velox.netUI.invite);
       assert.ok(code.startsWith("VLX1-"));
       await guest.bringToFront();
+      await guest.locator("[data-action=net-manual]").click();
       await guest.locator("#invite-code").fill(code);
-      await guest.locator("[data-action=net-join]").click();
+      await guest.locator("[data-action=net-join-manual]").click();
       await guest.waitForFunction(() => window.__velox.netUI.reply.length > 20);
       const reply = await guest.evaluate(() => window.__velox.netUI.reply);
       await host.bringToFront();
@@ -230,7 +241,7 @@ try {
     "test-results/task-12-network.json",
     JSON.stringify(report, null, 2),
   );
-  console.log("Two-tab room + WebRTC invite flows passed end to end");
+  console.log("Room code, same-browser and manual invite flows passed end to end");
 } finally {
   await browser.close();
 }

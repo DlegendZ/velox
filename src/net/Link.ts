@@ -9,10 +9,69 @@ export interface Link {
   onclose: () => void;
   close(): void;
 }
-/** Public STUN only discovers each player's address; game data always flows peer to peer. */
+/** Public STUN only discovers each player's address; game data flows peer to peer. */
 export const ICE_SERVERS: RTCIceServer[] = [
-  { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
+  { urls: ["stun:stun.l.google.com:19302", "stun:stun.cloudflare.com:3478"] },
 ];
+const RELAY_URL: string = import.meta.env?.VITE_TURN_URL ?? "";
+/** True when this build can fall back to a TURN relay. */
+export const hasRelay = () => !!RELAY_URL;
+let relay: Promise<RTCIceServer[]> | null = null;
+/**
+ * STUN plus, when the build sets VITE_TURN_URL (an endpoint returning a JSON list of
+ * ice servers, such as Metered's credentials URL), TURN relays. Players on carrier-grade
+ * NAT (most mobile data) can only reach each other through a relay.
+ */
+export function iceServers(): Promise<RTCIceServer[]> {
+  if (!RELAY_URL) return Promise.resolve(ICE_SERVERS);
+  relay ??= fetch(RELAY_URL, { signal: AbortSignal.timeout(5000) })
+    .then((r) => (r.ok ? r.json() : []))
+    .then((list: unknown) => [
+      ...ICE_SERVERS,
+      ...(Array.isArray(list)
+        ? list.filter(
+            (s): s is RTCIceServer =>
+              !!s && (typeof s.urls === "string" || Array.isArray(s.urls)),
+          )
+        : []),
+    ])
+    .catch(() => {
+      relay = null;
+      return ICE_SERVERS;
+    });
+  return relay;
+}
+export type NetworkKind = "open" | "strict" | "blocked";
+/**
+ * Classifies this network from two STUN lookups: a different public port per server
+ * means symmetric (carrier-grade) NAT, where direct links only work via a relay.
+ */
+export async function checkNetwork(): Promise<NetworkKind> {
+  const pc = new RTCPeerConnection({
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun.cloudflare.com:3478" },
+    ],
+  });
+  const mapped = new Set<string>();
+  pc.addEventListener("icecandidate", (e) => {
+    const c = e.candidate?.candidate.split(" ");
+    if (c?.[7] === "srflx") mapped.add(`${c[4]}:${c[5]}`);
+  });
+  pc.createDataChannel("probe");
+  await pc.setLocalDescription(await pc.createOffer());
+  await new Promise<void>((resolve) => {
+    const timer = setTimeout(resolve, 4000);
+    pc.addEventListener("icegatheringstatechange", () => {
+      if (pc.iceGatheringState === "complete") {
+        clearTimeout(timer);
+        resolve();
+      }
+    });
+  });
+  pc.close();
+  return mapped.size === 0 ? "blocked" : mapped.size > 1 ? "strict" : "open";
+}
 interface Signal {
   /** Session description type and SDP. */
   t: RTCSdpType;
@@ -31,8 +90,8 @@ export class RtcLink implements Link {
   private reliable: RTCDataChannel | null = null;
   private fast: RTCDataChannel | null = null;
   private closed = false;
-  constructor() {
-    this.pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+  constructor(servers = ICE_SERVERS) {
+    this.pc = new RTCPeerConnection({ iceServers: servers });
     this.pc.addEventListener("connectionstatechange", () => {
       const s = this.pc.connectionState;
       if (s === "failed" || s === "closed") this.close();
@@ -127,6 +186,83 @@ export class RtcLink implements Link {
       /* Already closed. */
     }
     if (wasOpen || this.peer) this.onclose();
+  }
+}
+/** The slice of a PeerJS DataConnection that PeerLink uses. */
+export interface BrokeredConnection {
+  open: boolean;
+  peerConnection: RTCPeerConnection;
+  dataChannel: RTCDataChannel;
+  on(event: "data", fn: (data: unknown) => void): unknown;
+  on(event: "open" | "close", fn: () => void): unknown;
+  on(event: "error", fn: (e: unknown) => void): unknown;
+  send(data: string): unknown;
+  close(): void;
+}
+/**
+ * Room-code link: the public PeerJS broker only swaps the connection offers, then race
+ * data flows peer to peer like RtcLink. PeerJS opens the reliable channel; an extra
+ * pre-agreed (negotiated) channel carries the unreliable car state.
+ */
+export class PeerLink implements Link {
+  open = false;
+  onmessage = (_: string) => {};
+  onopen = () => {};
+  onclose = () => {};
+  private fast: RTCDataChannel | null = null;
+  private closed = false;
+  constructor(
+    private conn: BrokeredConnection,
+    public peer: string,
+  ) {
+    conn.on("data", (d) => {
+      if (typeof d === "string") this.onmessage(d);
+    });
+    conn.on("open", () => this.ready());
+    conn.on("close", () => this.close());
+    conn.on("error", () => this.close());
+    if (conn.open) this.ready();
+  }
+  private ready() {
+    if (this.open || this.closed) return;
+    try {
+      this.fast = this.conn.peerConnection.createDataChannel("state", {
+        negotiated: true,
+        id: 7,
+        ordered: false,
+        maxRetransmits: 0,
+      });
+      this.fast.addEventListener("message", (e) => {
+        if (typeof e.data === "string") this.onmessage(e.data);
+      });
+    } catch {
+      this.fast = null;
+    }
+    this.open = true;
+    this.onopen();
+  }
+  send(data: string, reliable = true) {
+    if (!this.open) return;
+    const channel =
+      !reliable && this.fast?.readyState === "open"
+        ? this.fast
+        : this.conn.dataChannel;
+    if (!reliable && channel.bufferedAmount > 64 * 1024) return;
+    if (channel === this.fast) channel.send(data);
+    else if (channel?.readyState === "open") this.conn.send(data);
+  }
+  close() {
+    if (this.closed) return;
+    this.closed = true;
+    const wasOpen = this.open;
+    this.open = false;
+    try {
+      this.fast?.close();
+      this.conn.close();
+    } catch {
+      /* Already closed. */
+    }
+    if (wasOpen) this.onclose();
   }
 }
 interface LocalPacket {

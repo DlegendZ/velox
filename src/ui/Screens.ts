@@ -27,7 +27,8 @@ import { MODES, TRACKS, WEATHERS } from "../data/tracks";
 import { CAREER_EVENTS, TIERS } from "../data/careerEvents";
 import { ACHIEVEMENTS, dailyChallenge } from "../data/achievements";
 import { CAMERA_NAMES } from "../render/CameraRig";
-import { MAX_PLAYERS } from "../net/Session";
+import { MAX_PLAYERS, ROOM_LENGTH } from "../net/Session";
+import { hasRelay } from "../net/Link";
 import type { Game } from "../core/Game";
 const paths: Record<string, string> = {
   arrow: "M5 19 19 5M5 5h14v14",
@@ -178,7 +179,7 @@ export class Screens {
   }
   menu(title: boolean) {
     if (title)
-      return '<main class="title-screen"><h1>VELOX</h1><p>AFTER HOURS MOTOR CLUB</p><button data-action="enter" data-autofocus>PRESS ANY KEY</button><span class="version">0.8.1 / ORIGINAL MACHINES</span></main>';
+      return '<main class="title-screen"><h1>VELOX</h1><p>AFTER HOURS MOTOR CLUB</p><button data-action="enter" data-autofocus>PRESS ANY KEY</button><span class="version">0.9.0 / ORIGINAL MACHINES</span></main>';
     const g = this.g,
       c = carById(g.save.data.garage.activeCar),
       d = dailyChallenge(),
@@ -665,44 +666,84 @@ export class Screens {
     ).join("")}</div>`;
     return `${this.header("profile")}<main class="page scroll-page profile-page profile-${tab}">${this.top("DRIVER FILE", esc(d.profile.name), `Level ${d.profile.level} · ${fmt(d.profile.xp)} XP · ${unlocked} of ${ACHIEVEMENTS.length} achievements`)}${tabs}${body}</main>${this.footer()}`;
   }
+  /** Network check result, shared by the entry page and the lobby. */
+  private networkCard() {
+    const state = this.g.netUI.network,
+      info: Record<string, [string, string, string]> = {
+        "": [
+          "UNTESTED",
+          "",
+          "Check before you race: it tells you if a direct link can work from here.",
+        ],
+        checking: [
+          "CHECKING…",
+          "",
+          "Asking two public address servers how your router maps you.",
+        ],
+        open: ["OPEN", "good", "Direct connections work from this network."],
+        strict: [
+          "STRICT",
+          "warn",
+          hasRelay()
+            ? "Carrier-grade NAT (common on mobile data). VELOX will route through a relay."
+            : "Carrier-grade NAT (common on mobile data). If your friend is strict too, one of you should switch to home Wi-Fi.",
+        ],
+        blocked: [
+          "BLOCKED",
+          "bad",
+          "This network blocks WebRTC (office or school firewall). Try another network.",
+        ],
+      };
+    const [label, tone, text] = info[state];
+    return `<div class="net-check ${tone}"><div><p class="eyebrow">YOUR NETWORK</p><b>${label}</b><small>${text}</small></div><button class="button secondary" data-action="net-check" ${state === "checking" ? "disabled" : ""}>${state && state !== "checking" ? "RECHECK" : "CHECK"} ${icon("refresh")}</button></div>`;
+  }
   lobby() {
     const g = this.g,
-      n = g.net;
+      n = g.net,
+      ui = g.netUI;
     if (!n) {
-      const ui = g.netUI;
-      return `${this.header("lobby")}<main class="page scroll-page lobby-page">${this.top("ONLINE · PEER TO PEER", "RACE YOUR FRIENDS", "Each player runs VELOX on their own computer. Cars connect directly — no game server, no account.")}<div class="lobby-entry"><section class="settings-panel"><p class="eyebrow">01 / HOST</p><h2>Open a room</h2><p class="muted">You pick the track and start the race. Invite up to ${MAX_PLAYERS - 1} friends.</p><button class="button primary" data-action="net-host">HOST A ROOM ${icon("users")}</button></section><section class="settings-panel"><p class="eyebrow">02 / JOIN WITH A CODE</p><h2>Got an invite?</h2><p class="muted">Paste the invite code your host sent you. You will get a reply code to send back.</p><textarea id="invite-code" rows="3" placeholder="VLX1-…" spellcheck="false" data-keep></textarea>${ui.reply ? `<label class="code-label">YOUR REPLY CODE — SEND THIS TO THE HOST<textarea readonly rows="3" id="reply-code">${esc(ui.reply)}</textarea></label><button class="button secondary" data-action="copy-reply">${icon("copy")} COPY REPLY</button><p class="muted small waiting">Waiting for the host to paste your reply…</p>` : `<button class="button primary" data-action="net-join" ${ui.busy ? "disabled" : ""}>${ui.busy ? "CONNECTING…" : `JOIN ${icon("link")}`}</button>`}</section><section class="settings-panel"><p class="eyebrow">03 / SAME COMPUTER</p><h2>Second window</h2><p class="muted">Testing or couch play: open VELOX in another tab of this browser and enter the host's room letters.</p><input type="text" id="room-code" maxlength="3" placeholder="ABC" autocomplete="off" data-keep><button class="button secondary" data-action="net-local">JOIN ROOM ${icon("arrow")}</button></section></div><p class="muted small lobby-note">Connections use WebRTC. A public STUN address lookup helps peers find each other across the internet; race data never passes through it. On the same Wi-Fi/LAN no internet is needed. Very strict networks may block direct connections.</p></main>${this.footer()}`;
+      const joining = ui.busy && !!ui.guest,
+        manual = ui.manual
+          ? `<div class="net-manual"><section class="net-card"><p class="eyebrow">MANUAL CODES</p><h3>No room server</h3><p class="muted">If room codes fail, the host creates a long invite code in the lobby. Paste it here and send your reply back.</p><textarea id="invite-code" rows="2" placeholder="VLX1-…" spellcheck="false" data-keep></textarea>${ui.reply ? `<label class="code-label">YOUR REPLY CODE: SEND THIS TO THE HOST<textarea readonly rows="2" id="reply-code">${esc(ui.reply)}</textarea></label><button class="button secondary" data-action="copy-reply">${icon("copy")} COPY REPLY</button>` : `<button class="button secondary" data-action="net-join-manual">USE INVITE CODE ${icon("link")}</button>`}</section><section class="net-card"><p class="eyebrow">SAME COMPUTER</p><h3>Second window</h3><p class="muted">Open VELOX in another tab and enter the host's three room letters.</p><input type="text" id="room-code" maxlength="3" placeholder="ABC" autocomplete="off" data-keep><button class="button secondary" data-action="net-local">JOIN TAB ${icon("arrow")}</button></section></div>`
+          : "";
+      return `${this.header("lobby")}<main class="page scroll-page lobby-page net-entry-page">${this.top("ONLINE · PEER TO PEER", "RACE YOUR FRIENDS", "Every driver runs VELOX in their own browser. Share a room code and the cars link up directly.")}<div class="net-entry"><section class="net-card net-host"><p class="eyebrow">01 / HOST</p><h2>Open a room</h2><ol class="net-steps"><li><b>HOST</b><span>Pick the track, laps and weather</span></li><li><b>SHARE</b><span>One ${ROOM_LENGTH}-character code or an invite link</span></li><li><b>START</b><span>When up to ${MAX_PLAYERS - 1} friends are ready</span></li></ol><button class="button primary" data-action="net-host">HOST A ROOM ${icon("users")}</button></section><section class="net-card net-join"><p class="eyebrow">02 / JOIN</p><h2>Got a room code?</h2><p class="muted">Type the code your host sent. Invite links join by themselves.</p><input type="text" id="join-code" class="room-input" maxlength="${ROOM_LENGTH + 2}" placeholder="K7M2QX" autocomplete="off" autocapitalize="characters" spellcheck="false" data-keep ${joining ? "disabled" : ""}>${joining ? `<div class="row-buttons"><button class="button primary" disabled>CONNECTING…</button><button class="text-button" data-action="net-cancel-join">CANCEL</button></div>` : `<button class="button primary" data-action="net-join">JOIN ROOM ${icon("arrow")}</button>`}</section></div><div class="net-footer">${this.networkCard()}<button class="text-button net-more" data-action="net-manual">${ui.manual ? "HIDE OTHER WAYS" : "OTHER WAYS TO CONNECT"} ${icon(ui.manual ? "back" : "arrow")}</button></div>${manual}</main>${this.footer()}`;
     }
     const me = n.self,
       host = n.isHost,
       c = n.config,
-      invite = g.netUI.invite;
-    const players = n.players
-      .map(
-        (p, i) =>
-          `<div class="lobby-player ${p.id === n.selfId ? "me" : ""}"><span class="slot">${String(i + 1).padStart(2, "0")}</span><span class="car-swatch" style="--car-color:${p.visual.paint}">${icon("car")}</span><div><b>${esc(p.name)}${p.host ? ' <em class="host-tag">HOST</em>' : ""}</b><small>${carById(p.car).name.toUpperCase()}${p.host || p.id === n.selfId ? "" : ` · <span data-ping="${esc(p.id)}">${p.ping}</span> MS`}</small></div><span class="ready ${p.ready ? "on" : ""}">${p.ready ? "READY" : "NOT READY"}</span></div>`,
-      )
-      .join("");
-    const hostPanel = host
-      ? `<section class="settings-panel invite-panel"><p class="eyebrow">INVITE FRIENDS · ${n.players.length} / ${MAX_PLAYERS}</p>${
-          invite
-            ? `<label class="code-label">1 · SEND THIS INVITE CODE<textarea readonly rows="3" id="offer-code">${esc(invite)}</textarea></label><button class="button secondary" data-action="copy-invite">${icon("copy")} COPY INVITE</button><label class="code-label">2 · PASTE THEIR REPLY CODE<textarea id="answer-code" rows="3" placeholder="VLX1-…" spellcheck="false" data-keep></textarea></label><div class="row-buttons"><button class="button primary" data-action="net-accept" ${g.netUI.busy ? "disabled" : ""}>CONNECT ${icon("link")}</button><button class="text-button" data-action="net-cancel-invite">CANCEL</button></div>`
-            : `<p class="muted">Each friend needs their own code. Create one, send it, then paste back their reply.</p><button class="button primary" data-action="net-invite" ${g.netUI.busy || n.players.length >= MAX_PLAYERS ? "disabled" : ""}>${g.netUI.busy ? "GENERATING…" : `CREATE INVITE CODE ${icon("link")}`}</button>`
-        }<p class="muted small">Same-computer room: <b class="room-code">${esc(n.localRoom)}</b></p></section>`
-      : "";
-    return `${this.header("lobby")}<main class="page scroll-page lobby-page">${this.top(host ? "YOU ARE HOSTING" : "CONNECTED TO HOST", "THE MEET-UP", host ? "Choose the race, invite your crew, start when everyone is ready." : "Pick your car in the garage and mark yourself ready.")}<div class="lobby-grid"><section class="settings-panel"><p class="eyebrow">DRIVERS</p><div class="lobby-players">${players}</div>${host ? "" : `<button class="button ${me?.ready ? "secondary" : "primary"}" data-action="net-ready">${me?.ready ? "NOT READY" : `I'M READY ${icon("check")}`}</button>`}<button class="text-button" data-action="garage">CHANGE CAR ${icon("car")}</button></section><section class="settings-panel lobby-race-panel"><p class="eyebrow">THE RACE ${host ? "" : "· HOST DECIDES"}</p><div class="lobby-race-options"><label>MODE${select(
+      invite = ui.invite;
+    const players = Array.from({ length: MAX_PLAYERS }, (_, i) => {
+      const p = n.players[i];
+      return p
+        ? `<div class="lobby-player ${p.id === n.selfId ? "me" : ""}"><span class="slot">${String(i + 1).padStart(2, "0")}</span><span class="car-swatch" style="--car-color:${p.visual.paint}"></span><div><b>${esc(p.name)}${p.host ? ' <em class="host-tag">HOST</em>' : ""}${p.id === n.selfId ? ' <em class="you-tag">YOU</em>' : ""}</b><small>${carById(p.car).name.toUpperCase()}${p.host || p.id === n.selfId ? "" : ` · <span data-ping="${esc(p.id)}">${p.ping}</span> MS`}</small></div><span class="ready ${p.ready ? "on" : ""}">${p.ready ? "READY" : "NOT READY"}</span></div>`
+        : `<div class="lobby-player empty"><span class="slot">${String(i + 1).padStart(2, "0")}</span><div><b>Open slot</b></div></div>`;
+    }).join("");
+    const code = n.roomCode,
+      roomPanel = host
+        ? `<section class="net-card room-card"><p class="eyebrow">ROOM CODE · ${n.players.length} / ${MAX_PLAYERS}</p>${
+            code
+              ? `<div class="room-big" aria-label="Room code ${code}">${[...code].map((ch) => `<span>${ch}</span>`).join("")}</div><div class="row-buttons"><button class="button primary" data-action="copy-link">COPY LINK</button><button class="button secondary" data-action="copy-room">COPY CODE</button></div><p class="muted small">Friends open the link, or choose ONLINE and type the code.</p>`
+              : n.roomError
+                ? `<p class="room-error">${esc(n.roomError)}</p><p class="muted small">You can still invite with manual codes below.</p>`
+                : `<div class="room-big pending" aria-label="Opening room">${"<span></span>".repeat(ROOM_LENGTH)}</div><p class="muted small">Opening your room…</p>`
+          }<details class="manual-invite" ${invite || n.roomError ? "open" : ""}><summary>MANUAL INVITE CODES</summary>${
+            invite
+              ? `<label class="code-label">1 · SEND THIS INVITE CODE<textarea readonly rows="2" id="offer-code">${esc(invite)}</textarea></label><button class="button secondary" data-action="copy-invite">${icon("copy")} COPY INVITE</button><label class="code-label">2 · PASTE THEIR REPLY CODE<textarea id="answer-code" rows="2" placeholder="VLX1-…" spellcheck="false" data-keep></textarea></label><div class="row-buttons"><button class="button primary" data-action="net-accept" ${ui.busy ? "disabled" : ""}>CONNECT ${icon("link")}</button><button class="text-button" data-action="net-cancel-invite">CANCEL</button></div>`
+              : `<p class="muted small">For when the room server is unreachable: one code per friend, and they send a reply back.</p><button class="button secondary" data-action="net-invite" ${ui.busy || n.players.length >= MAX_PLAYERS ? "disabled" : ""}>${ui.busy ? "GENERATING…" : `CREATE INVITE CODE ${icon("link")}`}</button>`
+          }<p class="muted small">Same-computer tab: <b class="room-code">${esc(n.localRoom)}</b></p></details></section>`
+        : `<section class="net-card room-card"><p class="eyebrow">CONNECTED</p><h3>${code ? `ROOM ${code}` : "HOST'S ROOM"}</h3><p class="muted">The host picks the race. Choose your car and mark yourself ready.</p><button class="button ${me?.ready ? "secondary" : "primary"}" data-action="net-ready">${me?.ready ? "NOT READY" : `I'M READY ${icon("check")}`}</button></section>`;
+    const trackIndex = Math.max(0, TRACKS.findIndex((t) => t.id === c.track)),
+      track = TRACKS[trackIndex];
+    const options = `<label class="meet-option"><span>MODE</span>${select(
       'id="net-mode"',
       [
         ["race", "RACE"],
-        ["roam", "FREE ROAM CRUISE"],
+        ["roam", "CRUISE"],
       ],
       c.mode,
       !host,
-    )}</label><label>TRACK${select(
-      'id="net-track"',
-      TRACKS.map((t) => [t.id, t.name.toUpperCase()] as const),
-      c.track,
-      !host,
-    )}</label><div class="race-options compact">${this.raceOptions({ ...g.config, ...c }, !host, false)}</div><div class="lobby-map">${this.mapSVG(c.track, c.reverse)}</div></div><div class="panel-actions">${host ? `<button class="button primary start-button" data-action="net-start" ${n.canStart && n.players.length >= 2 ? "" : "disabled"}>${n.players.length < 2 ? "WAITING FOR 2 DRIVERS" : n.canStart ? "START RACE" : "WAITING FOR READY"} ${icon("flag")}</button>` : ""}</div></section>${hostPanel}<section class="settings-panel chat-panel"><p class="eyebrow">CHAT</p><div class="chat-log">${g.chatLog.map((m) => `<p><b>${esc(m.name)}</b> ${esc(m.text)}</p>`).join("") || '<p class="muted">Say hi.</p>'}</div><div class="chat-row"><input type="text" id="chat-input" maxlength="80" placeholder="Message" autocomplete="off" data-keep><button class="button secondary" data-action="net-chat" aria-label="Send">${icon("send")}</button></div></section></div><button class="danger text-button leave-button" data-action="net-leave">LEAVE ${host ? "AND CLOSE ROOM" : "LOBBY"} ${icon("back")}</button></main>${this.footer()}`;
+    )}</label><div class="race-options">${this.raceOptions({ ...g.config, ...c }, !host, false)}</div>`;
+    return `${this.header("lobby")}<main class="page lobby-page meet-page">${this.top(host ? "YOU ARE HOSTING" : "CONNECTED TO HOST", "THE MEET-UP")}<div class="meet-grid">${roomPanel}<section class="net-card meet-drivers"><div class="card-head"><p class="eyebrow">DRIVERS</p><button class="text-button" data-action="garage">CHANGE CAR ${icon("car")}</button></div><div class="lobby-players">${players}</div></section><section class="net-card meet-race"><div class="meet-race-head"><div><p class="eyebrow">THE RACE${host ? "" : " · HOST DECIDES"}</p><h2>${esc(track?.name ?? "")}${c.reverse ? " · REVERSE" : ""}</h2></div>${host ? `<button class="button primary start-button" data-action="net-start" ${n.canStart && n.players.length >= 2 ? "" : "disabled"}>${n.players.length < 2 ? "WAITING FOR DRIVERS" : n.canStart ? "START RACE" : "WAITING FOR READY"} ${icon("flag")}</button>` : ""}</div><div class="meet-race-body"><div class="meet-options">${options}</div><div class="lobby-map">${this.mapSVG(c.track, c.reverse)}<div class="map-picker">${host ? `<button class="garage-arrow" data-action="net-track-prev" aria-label="Previous track">←</button>` : ""}<div><small>${trackIndex + 1} / ${TRACKS.length} · ${esc(track?.length === "gp" ? "GRAND PRIX" : "CIRCUIT")}</small><b>${esc(track?.name ?? "")}</b></div>${host ? `<button class="garage-arrow" data-action="net-track-next" aria-label="Next track">→</button>` : ""}</div></div></div></section><section class="net-card chat-panel"><p class="eyebrow">CHAT</p><div class="chat-log">${g.chatLog.map((m) => `<p><b>${esc(m.name)}</b> ${esc(m.text)}</p>`).join("") || '<p class="muted">Say hi.</p>'}</div><div class="chat-row"><input type="text" id="chat-input" maxlength="80" placeholder="Message" autocomplete="off" data-keep><button class="button secondary" data-action="net-chat" aria-label="Send">${icon("send")}</button></div><button class="danger text-button leave-button" data-action="net-leave">LEAVE ${host ? "AND CLOSE ROOM" : "LOBBY"} ${icon("back")}</button></section></div></main>${this.footer()}`;
   }
   pause() {
     const g = this.g,
