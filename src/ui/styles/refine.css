@@ -1,0 +1,1213 @@
+/* 0.7 — final layer: two-step race setup, one scrollbar style, drag scrolling,
+   compact footer, single menu highlight and the tachometer loading screens. */
+
+:root {
+  --footer-height: 44px;
+}
+
+/* ------------------------------------------------------------- scrollbars */
+/* Chrome ignores ::-webkit-scrollbar once scrollbar-width/color are set, which
+   brought back the native arrow-button bars; reset them so one style applies. */
+#app,
+#app * {
+  scrollbar-width: auto !important;
+  scrollbar-color: auto !important;
+  scrollbar-gutter: auto !important;
+}
+#app ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background: transparent;
+}
+#app ::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+#app ::-webkit-scrollbar-track,
+#app ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+#app ::-webkit-scrollbar-thumb {
+  min-height: 48px;
+  border: 3px solid transparent;
+  border-radius: 8px;
+  background: rgba(205, 216, 228, 0.26) padding-box !important;
+}
+#app :hover::-webkit-scrollbar-thumb {
+  background: rgba(205, 216, 228, 0.42) padding-box !important;
+}
+#app ::-webkit-scrollbar-thumb:hover,
+#app ::-webkit-scrollbar-thumb:active {
+  background: var(--accent) padding-box !important;
+}
+@supports not selector(::-webkit-scrollbar) {
+  #app,
+  #app * {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(205, 216, 228, 0.36) transparent !important;
+  }
+}
+/* JS easing replaces CSS smooth scrolling so wheel and drag share one curve. */
+#app [data-scroll-key] {
+  scroll-behavior: auto;
+  scroll-snap-type: none;
+}
+body.drag-scrolling,
+body.drag-scrolling * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+#app img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* ----------------------------------------------------------------- footer */
+#app .footer {
+  height: var(--footer-height);
+  padding: 0 32px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+#app .footer .music-line {
+  gap: var(--space-2);
+}
+#app .footer .now-playing,
+#app .footer .footer-right > span {
+  font: 600 12px/1 var(--font-label);
+  letter-spacing: 0.08em;
+}
+#app .footer .footer-right {
+  gap: var(--space-4);
+}
+#app .footer kbd {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  font-size: 12px;
+  line-height: 18px;
+  margin-right: 4px;
+}
+#app .footer .sound-button {
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
+  padding: 14px;
+}
+#app .footer .sound-button svg {
+  width: 16px;
+  height: 16px;
+}
+#app :is(.page, .race-setup, .garage-page) {
+  height: calc(100dvh - var(--header-height) - var(--footer-height));
+}
+#app :is(.scroll-page, .page, .results-page) {
+  padding-bottom: 32px;
+}
+
+/* --------------------------------------------- main menu: one highlight */
+#app .home-entry,
+#app .home-entry:focus,
+#app .home-entry:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+#app .home-entry:is(:focus, :hover) {
+  color: var(--text-1) !important;
+  background: linear-gradient(
+    90deg,
+    rgba(200, 255, 60, 0.1),
+    transparent 70%
+  ) !important;
+}
+#app .home-entry:is(:focus, :hover)::after {
+  transform: scaleY(1);
+}
+#app .home-entry:is(:focus, :hover)::before {
+  color: var(--accent);
+}
+#app .home-entry:is(:focus, :hover) > span {
+  background: var(--accent-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.03em;
+}
+#app .home-entry:is(:focus, :hover) small {
+  max-height: 48px;
+  opacity: 1;
+  margin-top: 6px;
+}
+/* While the pointer is over the list only the hovered entry lights up. */
+#app .home-menu:hover .home-entry:not(:hover) {
+  background: transparent !important;
+  color: var(--text-2) !important;
+}
+#app .home-menu:hover .home-entry:not(:hover) > span {
+  background: none;
+  color: inherit;
+  letter-spacing: normal;
+}
+#app .home-menu:hover .home-entry:not(:hover)::after {
+  transform: scaleY(0);
+}
+#app .home-menu:hover .home-entry:not(:hover)::before {
+  color: inherit;
+}
+#app .home-menu:hover .home-entry:not(:hover) small {
+  opacity: 0;
+  max-height: 0;
+  margin-top: 0;
+}
+/* Mode and settings tabs show focus through their fill, not a ring. */
+body.input-keys #app :is(.mode-tab, .settings-tabs button, .home-entry):focus {
+  outline: none;
+}
+body.input-keys #app .mode-tab:focus:not(.selected) {
+  background: var(--bg-3);
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+/* ---------------------------------------------------- race setup: shared */
+#app .race-setup {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 2.2vh, 22px);
+  padding: clamp(14px, 2.6vh, 28px) 5vw clamp(12px, 2vh, 20px);
+  overflow-y: auto;
+}
+#app .setup-heading {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  grid-template-areas:
+    "back steps steps"
+    "title title desc";
+  align-items: end;
+  column-gap: var(--space-5);
+  row-gap: 6px;
+  margin: 0;
+}
+#app .setup-heading .back-link {
+  grid-area: back;
+  align-self: center;
+  margin: 0;
+}
+#app .setup-steps {
+  grid-area: steps;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 700 12px/1 var(--font-label);
+  letter-spacing: 0.12em;
+  color: var(--text-3);
+}
+#app .setup-steps i {
+  width: 36px;
+  height: 2px;
+  background: var(--line-strong);
+}
+#app .setup-steps .current {
+  color: var(--accent);
+}
+#app .setup-steps .done {
+  color: var(--text-2);
+}
+#app .setup-heading h1 {
+  grid-area: title;
+  font-size: clamp(30px, 4.6vh, 44px);
+  line-height: 1;
+  margin: 0;
+}
+#app .setup-heading p {
+  grid-area: desc;
+  justify-self: end;
+  max-width: 460px;
+  margin: 0;
+  text-align: right;
+  color: var(--text-2);
+}
+
+/* --------------------------------------------- step 1: choose the circuit */
+#app .setup-track .mode-strip {
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+#app .setup-track .mode-tab {
+  min-height: clamp(44px, 6vh, 56px);
+}
+#app .setup-track .track-browser {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(8px, 1.6vh, 16px);
+  overflow: visible;
+}
+#app .setup-track .carousel {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  max-height: 440px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, min(460px, 36vw)) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(16px, 2vw, 32px);
+  height: auto;
+}
+#app .setup-track .carousel-slot,
+#app .setup-track .carousel-slot:focus-within {
+  position: static;
+  left: auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  transform: none;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+#app .setup-track .carousel-slot.offset--1 {
+  grid-column: 1;
+  justify-self: end;
+  max-width: 380px;
+  height: 82%;
+}
+#app .setup-track .carousel-slot.offset-0 {
+  grid-column: 2;
+  height: 100%;
+  opacity: 1;
+  z-index: 1;
+}
+#app .setup-track .carousel-slot.offset-1 {
+  grid-column: 3;
+  justify-self: start;
+  max-width: 380px;
+  height: 82%;
+}
+#app .setup-track .carousel-slot:not(.offset-0) {
+  opacity: 0.5;
+}
+#app .setup-track .carousel-slot:not(.offset-0):is(:hover, :focus-within) {
+  opacity: 0.85;
+}
+#app .setup-track .track-card {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+#app .setup-track .track-art {
+  flex: 1;
+  height: auto;
+  min-height: 70px;
+}
+#app .setup-track .track-detail {
+  flex-shrink: 0;
+  padding: clamp(10px, 1.6vh, 18px) 20px;
+}
+#app .setup-track .track-detail h2 {
+  font-size: clamp(20px, 2.9vh, 28px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0 0 8px;
+}
+@media (max-height: 800px) {
+  #app .setup-track .track-chips > span:nth-child(n + 4),
+  #app .setup-track .track-detail p {
+    display: none;
+  }
+  #app .setup-track .track-detail h2 {
+    margin-bottom: 4px;
+  }
+}
+#app .setup-track .offset-0 .track-card {
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(198, 255, 61, 0.35);
+}
+#app .setup-track .carousel-slot:not(.offset-0) .track-chips > span:nth-child(n + 4),
+#app .setup-track .carousel-slot:not(.offset-0) .track-detail p {
+  display: none;
+}
+#app .carousel-commands {
+  margin: 0;
+  gap: var(--space-4);
+}
+#app .carousel-count {
+  font: 600 13px/1 var(--font-num);
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  min-width: 56px;
+  text-align: center;
+}
+#app .carousel-count b {
+  color: var(--text-1);
+  font-size: 16px;
+}
+#app .carousel-dots {
+  display: flex;
+  gap: 5px;
+}
+#app .carousel-dots i {
+  width: 14px;
+  height: 3px;
+  background: var(--line-strong);
+  transition:
+    background 0.2s,
+    width 0.2s;
+}
+#app .carousel-dots i.on {
+  width: 28px;
+  background: var(--accent);
+}
+#app .carousel-commands .button {
+  min-width: 48px;
+  min-height: 44px;
+}
+#app .setup-next-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  flex-shrink: 0;
+  padding-top: clamp(8px, 1.4vh, 14px);
+  border-top: 1px solid var(--line);
+}
+#app .setup-next-row p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font: 600 13px/1.2 var(--font-label);
+  letter-spacing: 0.08em;
+  color: var(--text-2);
+  min-width: 0;
+}
+#app .setup-next-row p b {
+  font: inherit;
+  color: var(--text-1);
+  text-transform: uppercase;
+}
+#app .setup-next-row p svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+#app .setup-next {
+  min-width: 280px;
+  min-height: 52px;
+  font-size: 17px;
+}
+
+/* --------------------------------------------- step 2: race conditions */
+#app .conditions-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(16px, 2.4vw, 36px);
+}
+#app .setup-track-summary {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: linear-gradient(145deg, #183a4a, #101924 70%);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+}
+#app .setup-track-summary.env-coast {
+  background: linear-gradient(140deg, #384a52, #23323a 60%, #7e6758);
+}
+#app .setup-track-summary.env-canyon {
+  background: linear-gradient(145deg, #644331, #1e1d24 80%);
+}
+#app .summary-art {
+  flex: 1;
+  min-height: 0;
+  padding: clamp(10px, 2vh, 24px);
+}
+#app .summary-art svg {
+  width: 100%;
+  height: 100%;
+  color: var(--text-1);
+  filter: drop-shadow(0 6px 12px #0009);
+}
+#app .summary-detail {
+  padding: clamp(14px, 2.2vh, 22px) 24px;
+  background: rgba(7, 9, 13, 0.72);
+  backdrop-filter: blur(6px);
+}
+#app .summary-detail h2 {
+  font-size: clamp(24px, 3.6vh, 34px);
+  margin: 4px 0 clamp(8px, 1.4vh, 14px);
+}
+#app .summary-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0 0 clamp(8px, 1.4vh, 14px);
+}
+#app .summary-stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+#app .summary-stats dt {
+  font: 600 12px/1 var(--font-label);
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+}
+#app .summary-stats dd {
+  margin: 0;
+  font: 700 clamp(18px, 2.6vh, 24px) / 1.1 var(--font-num);
+  color: var(--text-1);
+  white-space: nowrap;
+}
+#app .summary-stats small {
+  font-size: 0.6em;
+  margin-left: 2px;
+  color: var(--text-2);
+}
+#app .change-track {
+  min-height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  font: 700 13px/1 var(--font-label);
+  letter-spacing: 0.1em;
+}
+#app .change-track svg {
+  width: 16px;
+  height: 16px;
+}
+#app .setup-conditions .conditions {
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(14px, 2.4vh, 24px) clamp(16px, 2vw, 28px);
+  overflow: hidden;
+}
+#app .setup-conditions .conditions h2 {
+  font-size: clamp(20px, 3vh, 26px);
+  margin: 0 0 clamp(10px, 1.8vh, 18px);
+}
+#app .setup-conditions .condition-options {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: space-evenly;
+  gap: clamp(10px, 2vh, 20px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+#app .setup-conditions .condition-row {
+  display: grid;
+  grid-template-columns: clamp(96px, 9vw, 140px) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+  padding-bottom: clamp(10px, 2vh, 20px);
+  border-bottom: 1px solid var(--line);
+}
+#app .setup-conditions .condition-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+#app .setup-conditions .condition-row > span {
+  font: 700 13px/1 var(--font-label);
+  letter-spacing: 0.12em;
+  color: var(--text-2);
+  text-transform: uppercase;
+}
+#app .setup-conditions .segmented {
+  display: flex;
+  flex-wrap: nowrap !important;
+  gap: 4px;
+}
+#app .setup-conditions .segmented button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 44px;
+  padding: 6px 4px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+#app .setup-conditions .stepper button {
+  width: 44px;
+  height: 44px;
+}
+#app .setup-conditions .panel-actions {
+  position: static;
+  padding-top: clamp(12px, 2vh, 20px);
+  background: none;
+}
+#app .setup-conditions .start-button {
+  min-height: clamp(52px, 7vh, 64px);
+}
+
+@media (max-width: 1100px) {
+  #app .conditions-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+  }
+  #app .summary-art {
+    height: 180px;
+    flex: none;
+  }
+  #app .setup-conditions .conditions {
+    overflow: visible;
+  }
+  #app .setup-conditions .condition-options {
+    overflow: visible;
+  }
+}
+@media (max-width: 760px) {
+  #app .setup-conditions .condition-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  #app .setup-heading {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "back steps"
+      "title title"
+      "desc desc";
+  }
+  #app .setup-heading p {
+    justify-self: start;
+    text-align: left;
+  }
+  #app .setup-track .carousel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #app .setup-track .carousel-slot:not(.offset-0) {
+    display: none;
+  }
+  #app .setup-track .carousel-slot.offset-0 {
+    grid-column: 1;
+  }
+  #app .carousel-dots {
+    display: none;
+  }
+  #app .setup-next-row p {
+    display: none;
+  }
+  #app .setup-next {
+    width: 100%;
+    min-width: 0;
+  }
+  #app .setup-conditions .condition-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ----------------------------------------------------- loading screens */
+#app .load-shell {
+  position: relative;
+  height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(24px, 6vw, 120px);
+  padding: 0 clamp(24px, 9vw, 180px);
+  text-align: left;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 70% 60% at 72% 46%, rgba(79, 216, 255, 0.12), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(198, 255, 61, 0.06), transparent 70%),
+    var(--bg-0);
+  pointer-events: auto;
+}
+#app .load-brand {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+#app .load-wordmark {
+  display: block;
+  font: 800 italic clamp(64px, 11vw, 168px) / 0.9 var(--font-display);
+  font-stretch: 112% !important;
+  letter-spacing: -0.01em;
+  color: var(--text-1);
+  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  animation: load-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+#app .load-brand .eyebrow {
+  margin: 14px 0 0;
+  letter-spacing: 0.32em;
+  color: var(--text-2);
+}
+#app .load-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: clamp(24px, 5vh, 48px) 0 0;
+  font: 600 14px/1.3 var(--font-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-1);
+}
+#app .load-status i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  animation: load-blink 1s ease-in-out infinite;
+}
+#app .gauge {
+  position: relative;
+  z-index: 1;
+  width: clamp(220px, 30vw, 380px);
+  aspect-ratio: 1;
+  animation: load-in 0.7s 0.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+#app .gauge svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+#app .gauge-spin {
+  fill: none;
+  stroke: rgba(79, 216, 255, 0.5);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 19;
+  transform-origin: 120px 120px;
+  animation: load-spin 6s linear infinite;
+}
+#app .gauge-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 18;
+}
+#app .gauge-red {
+  fill: none;
+  stroke: rgba(255, 61, 127, 0.4);
+  stroke-width: 18;
+}
+#app .gauge-fill {
+  fill: none;
+  stroke: url(#gauge-fill);
+  stroke-width: 18;
+  filter: drop-shadow(0 0 6px rgba(198, 255, 61, 0.6));
+}
+#app .gauge-inner {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+#app .gauge-labels text {
+  font: 700 12px var(--font-num);
+  fill: var(--text-3);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+#app .gauge-labels text.red {
+  fill: var(--hot);
+}
+#app .gauge-needle path {
+  fill: var(--hot);
+  filter: drop-shadow(0 0 4px rgba(255, 61, 127, 0.8));
+}
+#app .gauge-needle circle {
+  fill: #151b24;
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 2;
+}
+#app .gauge-readout {
+  position: absolute;
+  left: 50%;
+  top: 68%;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  justify-content: center;
+  column-gap: 2px;
+  text-align: center;
+}
+#app .gauge-readout b {
+  font: 800 clamp(36px, 4.8vw, 60px) / 1 var(--font-num);
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+}
+#app .gauge-readout small {
+  font: 700 18px/1 var(--font-num);
+  color: var(--text-2);
+}
+#app .gauge-readout span {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  font: 700 12px/1 var(--font-label);
+  letter-spacing: 0.3em;
+  color: var(--text-3);
+}
+#app .gauge.redline .gauge-readout b {
+  color: var(--accent);
+}
+/* Lane markings streaming toward the viewer. */
+#app .load-road {
+  position: absolute;
+  left: 50%;
+  bottom: -10vh;
+  width: 140vw;
+  height: 60vh;
+  transform: translateX(-50%) perspective(420px) rotateX(68deg);
+  transform-origin: 50% 100%;
+  background: linear-gradient(90deg, transparent 18%, rgba(255, 255, 255, 0.03) 30%, rgba(255, 255, 255, 0.03) 70%, transparent 82%);
+  mask-image: linear-gradient(to top, #000 10%, transparent 95%);
+  pointer-events: none;
+}
+#app .load-road i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: repeating-linear-gradient(to bottom, rgba(198, 255, 61, 0.55) 0 60px, transparent 60px 140px);
+  background-size: 100% 140px;
+  animation: load-lane 0.45s linear infinite;
+}
+#app .load-road i:nth-child(1) {
+  left: 30%;
+  background: rgba(255, 255, 255, 0.18);
+  animation: none;
+}
+#app .load-road i:nth-child(2) {
+  left: calc(50% - 3px);
+}
+#app .load-road i:nth-child(3) {
+  left: 70%;
+  background: rgba(255, 255, 255, 0.18);
+  animation: none;
+}
+@keyframes load-lane {
+  to {
+    background-position: 0 140px;
+  }
+}
+@keyframes load-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes load-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes load-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+/* Race loading: circuit name and map on the left, gauge on the right. */
+#app .loading-screen.load-shell h1 {
+  font-size: clamp(36px, 6vw, 84px);
+  line-height: 0.95;
+  margin: 10px 0 0;
+}
+#app .loading-screen .loading-map {
+  width: min(420px, 100%);
+  height: clamp(120px, 24vh, 240px);
+  margin-top: clamp(12px, 3vh, 28px);
+}
+#app .loading-screen .loading-tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 460px;
+  margin: 14px 0 0;
+  font-size: 14px;
+  color: var(--text-2);
+}
+#app .loading-screen .loading-tip b {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  font: 700 12px/1 var(--font-label);
+  letter-spacing: 0.1em;
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+@media (max-width: 760px) {
+  #app .load-shell {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    align-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+  #app .load-status {
+    justify-content: center;
+  }
+  #app .loading-screen .loading-map {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #app .load-road i,
+  #app .gauge-spin,
+  #app .load-status i {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------- compact page headings (all) */
+#app .page-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--space-4);
+  row-gap: 2px;
+  margin: 0 0 clamp(12px, 2.4vh, 24px);
+}
+#app .page-heading .back-link {
+  grid-column: 1;
+  margin: 0 0 0 -12px;
+}
+#app .page-heading .eyebrow {
+  grid-column: 2;
+  margin: 0;
+}
+#app .page-heading h1 {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: clamp(28px, 4.4vh, 44px);
+  line-height: 1.05;
+}
+#app .page-heading .description {
+  grid-column: 1 / -1;
+  margin: 4px 0 0;
+}
+#app .page {
+  padding-top: clamp(12px, 2.4vh, 24px);
+}
+
+/* ------------------------------------------------------- career: compact */
+#app .career-page .season-line {
+  margin: 0 0 clamp(10px, 2vh, 20px);
+}
+#app .career-page .season-line button {
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  row-gap: 2px;
+}
+#app .career-page .season-line small {
+  margin: 0;
+}
+#app .career-event {
+  gap: var(--space-5);
+  padding: clamp(8px, 1.4vh, 14px) 16px;
+}
+#app .career-event .event-details {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  align-items: center;
+  column-gap: var(--space-4);
+  row-gap: 4px;
+}
+#app .career-event .event-details h2 {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: clamp(18px, 2.6vh, 22px);
+}
+#app .career-event .event-details p {
+  margin: 0;
+}
+#app .career-event .pi-chip {
+  margin: 0;
+}
+#app .career-event .event-index {
+  font-size: clamp(22px, 3vh, 30px);
+}
+#app .career-event .button {
+  min-height: 44px;
+}
+
+/* ------------------------------------------- settings: two-column rows */
+#app .settings-page .settings-layout {
+  max-width: none;
+}
+@media (min-width: 1200px) {
+  #app .settings-content {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(24px, 3vw, 48px);
+    align-content: start;
+  }
+  #app .settings-content > :not(.setting-row) {
+    grid-column: 1 / -1;
+  }
+}
+#app .setting-row {
+  min-height: 0;
+  padding: clamp(10px, 1.6vh, 16px) 0;
+  gap: var(--space-5);
+}
+#app .setting-row p {
+  margin-top: 2px;
+  font-size: 13px;
+}
+#app .setting-row .setting-control {
+  width: 52%;
+}
+#app .settings-content .danger.text-button {
+  justify-self: start;
+  margin-top: var(--space-4);
+}
+
+/* ------------------------------------------------ profile: two tabs */
+#app .profile-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0 0 clamp(12px, 2.4vh, 24px);
+}
+#app .profile-tabs button {
+  min-height: 44px;
+  padding: 0 20px;
+  background: var(--bg-2);
+  color: var(--text-2);
+  font: 700 13px/1 var(--font-label);
+  letter-spacing: 0.1em;
+  border-bottom: 3px solid transparent;
+}
+#app .profile-tabs button.selected {
+  color: var(--text-1);
+  border-color: var(--accent);
+  background: var(--bg-3);
+}
+#app .profile-page .stat-tiles .stat-number {
+  padding-top: clamp(8px, 1.6vh, 16px);
+  padding-bottom: clamp(8px, 1.6vh, 16px);
+}
+#app .profile-page .achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-2);
+}
+#app .profile-page .achievement {
+  padding: 10px 14px;
+  min-height: 0;
+}
+
+/* --------------------------- garage: Performance / Customize own the column */
+@media (min-width: 701px) {
+  #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) {
+    grid-template-columns: 200px minmax(0, 1fr) minmax(360px, 440px);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "head head head" "rail stage info";
+  }
+  #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) .garage-strip {
+    display: none;
+  }
+  #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) .garage-info {
+    grid-row: 2;
+    align-self: stretch;
+    height: 100%;
+    max-height: 100%;
+  }
+  #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) .garage-info-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  #app .garage-tab-visual .garage-info :is(.spec-line, .stat-bars) {
+    display: none;
+  }
+  #app .garage-tab-performance .garage-info .spec-line {
+    display: none;
+  }
+  #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) .garage-tools {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+  }
+  #app .garage-tab-performance .upgrade-row {
+    padding: 8px 0;
+    min-height: 0;
+  }
+}
+
+/* ----------------------------------------- garage tools: compact rows */
+@media (min-width: 701px) {
+  #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) .garage-activate {
+    margin-top: var(--space-2);
+    padding-top: var(--space-2);
+  }
+  /* The active car is already the one being tuned: no "current ride" button. */
+  #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) .garage-activate .button {
+    display: none;
+  }
+  #app .garage-tab-performance .upgrade-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-3);
+    padding: 8px 0;
+  }
+  #app .garage-tab-performance .upgrade-row > div > small {
+    display: none;
+  }
+  #app .garage-tab-performance .upgrade-row b {
+    font-size: 15px;
+  }
+  #app .garage-tab-performance .upgrade-pips {
+    margin-top: 6px;
+    gap: 4px;
+  }
+  #app .garage-tab-performance .upgrade-pips i {
+    width: 22px;
+    height: 5px;
+  }
+  #app .garage-tab-performance .upgrade-buy {
+    min-width: 136px;
+    min-height: 44px;
+    padding: 4px 10px;
+    font-size: 15px;
+    line-height: 1.1;
+  }
+  #app .garage-tab-performance .upgrade-buy small {
+    display: block;
+    font-size: 12px;
+  }
+  #app .garage-tab-visual .customize {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 14px 16px;
+  }
+  #app .garage-tab-visual .customize > label {
+    flex: 1 1 100%;
+    min-width: 0;
+    gap: 6px;
+  }
+  /* Paint picker and swatches share the first row. */
+  #app .garage-tab-visual .customize > label:first-child {
+    flex: 0 0 auto;
+  }
+  #app .garage-tab-visual .swatches {
+    flex: 1 1 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: end;
+    gap: 6px;
+    min-width: 0;
+  }
+  #app .garage-tab-visual .color-pair {
+    flex: 1 1 100%;
+  }
+  #app .garage-tab-visual .color-pair > label {
+    flex: 1 1 0;
+  }
+}
+
+/* ------------------------------------------ career rows on one line */
+#app .career-event .event-details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-4);
+  row-gap: 4px;
+}
+#app .career-event .event-details h2 {
+  flex: 0 0 100%;
+}
+@media (min-width: 1100px) {
+  #app .career-event .event-details h2 {
+    flex: 0 0 auto;
+    min-width: 220px;
+  }
+}
+#app .career-page .season-line .season-node {
+  width: 40px;
+  height: 40px;
+}
+
+/* ------------------------------------------- compact bindings and tiles */
+#app .binding-grid {
+  margin-top: var(--space-4);
+  row-gap: 0;
+}
+#app .binding-grid button {
+  min-height: 48px;
+  padding: 6px 6px;
+}
+#app .binding-grid kbd {
+  height: 30px;
+}
+#app .profile-page .stat-tiles {
+  margin: 0;
+}
+#app .profile-page .stat-number {
+  padding: clamp(8px, 1.4vh, 16px) 8px;
+}
+#app .profile-page .stat-number strong {
+  font-size: clamp(24px, 3.4vh, 32px);
+}
+#app .profile-page .profile-xp {
+  margin: 0 0 var(--space-3);
+}
+
+/* Empty invite boxes never show a scrollbar; long codes still scroll. */
+#app textarea:placeholder-shown {
+  overflow-y: hidden;
+}
+#app :is(.page, .scroll-page) {
+  padding-bottom: 16px;
+}
+@media (max-height: 800px) {
+  #app .page-heading .description {
+    display: none;
+  }
+  #app .setting-row {
+    padding: 8px 0;
+  }
+  #app .settings-tabs button {
+    min-height: 44px;
+  }
+}
+@media (min-width: 701px) {
+  #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) .garage-activate {
+    display: none;
+  }
+}
+@media (min-width: 1200px) {
+  #app .binding-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-height: 760px) {
+  #app .profile-tabs {
+    margin-bottom: 8px;
+  }
+  #app .profile-page .stat-number {
+    padding: 6px 8px;
+  }
+}
+#app .garage-tab-visual .customize .segmented {
+  flex-wrap: wrap !important;
+  gap: 4px;
+}
+#app .garage-tab-visual .customize .segmented button {
+  flex: 1 0 auto;
+  min-width: 72px;
+  min-height: 44px;
+  padding: 6px 10px;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}

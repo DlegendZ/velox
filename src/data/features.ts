@@ -1,0 +1,15 @@
+export const FEATURES = {
+  racing: true,
+  career: true,
+  garage: true,
+  photoMode: true,
+  replay: true,
+  freeRoam: true,
+  ssr: false,
+  cascadedShadows: false,
+  depthOfField: false,
+  damage: false,
+  snowPass: false,
+  traffic: true,
+  webGPU: false,
+};

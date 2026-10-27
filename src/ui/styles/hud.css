@@ -1,0 +1,881 @@
+.race-hud {
+  position: fixed;
+  inset: 0;
+  user-select: none;
+  pointer-events: none;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.8),
+    0 0 12px rgba(0, 0, 0, 0.45);
+  transform: scale(var(--hud-scale));
+  transform-origin: top left;
+  width: calc(100% / var(--hud-scale));
+  height: calc(100% / var(--hud-scale));
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(#07090d44, transparent 26% 65%, #07090d55);
+}
+.race-hud .plate {
+  background: rgba(7, 9, 13, 0.78);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  text-shadow:
+    0 1px 2px #000c,
+    0 0 12px #0007;
+}
+.race-position {
+  position: absolute;
+  left: 40px;
+  top: 28px;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: 12px 20px;
+  border-left: 4px solid var(--accent) !important;
+}
+.race-position strong {
+  font: 700 italic 72px/1 var(--font-display);
+}
+.race-position > span {
+  font: 600 28px var(--font-num);
+  color: var(--text-2);
+}
+#position-arrow {
+  font-size: 28px;
+  color: var(--accent);
+}
+#position-arrow.down {
+  color: var(--hot);
+}
+.race-laps {
+  position: absolute;
+  left: 50%;
+  top: 28px;
+  transform: translateX(-50%);
+  padding: 12px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 260px;
+}
+.race-laps > span:first-child {
+  font: 600 20px var(--font-display);
+  letter-spacing: 0.06em;
+}
+.race-laps > strong {
+  font: 600 34px var(--font-num);
+  margin: 3px 0;
+}
+.race-laps > small {
+  font-size: 16px;
+  color: var(--text-2);
+}
+.race-laps small b {
+  font-weight: 500;
+}
+.split {
+  position: absolute;
+  top: 100%;
+  margin-top: 8px;
+  padding: 5px 14px;
+  font: 600 20px var(--font-num);
+  background: var(--bg-1);
+  opacity: 0;
+}
+.split.show {
+  animation: split-show 3s both;
+}
+.split.ahead {
+  color: var(--accent);
+}
+.split.behind {
+  color: var(--hot);
+}
+@keyframes split-show {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  8%,
+  88% {
+    opacity: 1;
+  }
+}
+.hud-track {
+  position: absolute;
+  right: 110px;
+  top: 28px;
+  padding: 14px 20px;
+  max-width: 340px;
+  text-align: right;
+}
+.hud-track span {
+  font: 600 22px var(--font-display);
+  display: block;
+}
+.hud-track small {
+  font-size: 13px;
+  display: block;
+  color: var(--text-2);
+  margin-top: 6px;
+}
+.hud-pause {
+  position: absolute;
+  right: 40px;
+  top: 28px;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+}
+.standings {
+  position: absolute;
+  left: 40px;
+  top: 140px;
+  width: 280px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.standings li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 36px;
+  padding: 7px 12px;
+  background: #07090dc9;
+  border-left: 3px solid transparent;
+  font-size: 15px;
+}
+.standings li.me {
+  border-left-color: var(--accent);
+  background: #1c290ae8;
+  color: var(--accent);
+}
+.standings li > span {
+  font: 600 20px var(--font-num);
+  width: 16px;
+}
+.standings li i {
+  width: 3px;
+  height: 17px;
+}
+.standings li > b {
+  font-size: 15px;
+  font-weight: 500;
+  flex: 1;
+}
+.standings li small {
+  font-size: 14px;
+  color: var(--text-2);
+}
+.standings li.out {
+  opacity: 0.5;
+}
+.color-safe .standings li > i {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  width: 9px;
+}
+.speedometer {
+  position: absolute;
+  right: 40px;
+  bottom: 34px;
+  width: 300px;
+  padding: 20px 22px 22px;
+  border-bottom: 3px solid var(--accent) !important;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 14px),
+    calc(100% - 14px) 100%,
+    0 100%
+  );
+}
+.rpm-arc {
+  width: 260px;
+  height: 180px;
+  display: block;
+  overflow: visible;
+}
+.rpm-arc path {
+  stroke-linecap: round;
+}
+.speed-ticks {
+  stroke: var(--text-2);
+  stroke-width: 1;
+  opacity: 0.65;
+}
+.speed-red-zone {
+  opacity: 0.6;
+}
+.speed-value {
+  position: absolute;
+  top: 65px;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+.speed-value > span {
+  font: 600 italic 96px/1 var(--font-num);
+}
+.speed-value > small {
+  display: block;
+  font-size: 14px;
+  color: var(--text-2);
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+.speed-value > b {
+  position: absolute;
+  right: 12px;
+  top: 52px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  display: grid;
+  place-items: center;
+  background: var(--bg-2);
+  font: 600 20px var(--font-num);
+  color: var(--accent);
+}
+.speed-value > b small {
+  display: none;
+}
+.speed-value > b.limiter {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.shift-lights {
+  position: absolute;
+  right: 12px;
+  top: 180px;
+  display: flex;
+  gap: var(--space-2);
+}
+.shift-lights i {
+  width: 8px;
+  height: 6px;
+  background: var(--bg-3);
+  border-radius: 3px;
+}
+.shift-lights i.on {
+  background: var(--accent);
+  box-shadow: 0 0 8px #c6ff3d88;
+}
+.shift-lights i.on:nth-child(4) {
+  background: var(--gold);
+}
+.shift-lights i.on:nth-child(5) {
+  background: var(--danger);
+}
+.rpm-track {
+  height: 3px;
+  background: var(--bg-3);
+  margin: 0 8px 16px;
+}
+.rpm-track i {
+  height: 100%;
+  background: var(--accent);
+  display: block;
+}
+.nitro-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--accent);
+  margin-top: 14px;
+}
+.nitro-label b {
+  font-size: 14px;
+  font-weight: 600;
+}
+.nitro-track {
+  height: 10px;
+  background: var(--bg-3);
+  margin-top: 10px;
+  mask-image: repeating-linear-gradient(
+    90deg,
+    #000 0 calc(10% - 3px),
+    transparent calc(10% - 3px) 10%
+  );
+}
+.nitro-track > i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.05s;
+}
+.speedometer[data-nitro-state="active"] .nitro-track > i {
+  background: repeating-linear-gradient(
+    115deg,
+    #f5ffd5 0 8px,
+    var(--accent) 8px 16px
+  );
+  background-size: 32px 100%;
+  animation: nitro-flow 0.4s linear infinite;
+}
+.speedometer[data-nitro-state="locked"] .nitro-track > i {
+  background: var(--danger);
+}
+.speedometer[data-nitro-state="locked"] .nitro-label {
+  color: var(--danger);
+  animation: nitro-recharging 1s infinite alternate;
+}
+@keyframes nitro-flow {
+  to {
+    background-position: 32px 0;
+  }
+}
+@keyframes nitro-recharging {
+  to {
+    opacity: 0.55;
+  }
+}
+.minimap {
+  position: absolute;
+  left: 40px;
+  bottom: 34px;
+  width: 260px;
+  padding: 0 0 10px;
+}
+.minimap canvas {
+  width: 260px;
+  height: 260px;
+  display: block;
+}
+.minimap > span {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-2);
+  letter-spacing: 0.06em;
+}
+.driving-hints {
+  position: absolute;
+  bottom: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--space-4);
+  padding: 12px 18px;
+  font-size: 14px;
+}
+.driving-hints > span {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  white-space: nowrap;
+}
+.race-center {
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  top: 30%;
+  text-align: center;
+}
+#countdown {
+  font: 800 italic 200px/1 var(--font-display);
+  color: var(--accent);
+}
+#countdown.pop {
+  animation: count-pop 0.3s ease-out;
+}
+#countdown.waiting {
+  font-size: 28px;
+  line-height: 1.3;
+}
+#score-popup,
+#drift-score {
+  font: 600 italic 28px var(--font-display);
+  color: var(--accent);
+  margin-top: 12px;
+}
+#score-popup:not(:empty) {
+  animation: popup-slide 0.3s ease-out;
+}
+#drift-score {
+  color: var(--gold);
+}
+#mode-timer {
+  font: 600 22px var(--font-num);
+  margin-top: 16px;
+}
+#wrong-way:not(:empty) {
+  position: absolute;
+  top: 26%;
+  left: 0;
+  right: 0;
+  background: #ba281be6;
+  text-align: center;
+  padding: 12px;
+  font: 700 28px var(--font-display);
+  letter-spacing: 0.1em;
+}
+.start-lights {
+  position: absolute;
+  left: 50%;
+  top: 20%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--space-4);
+  padding: 14px;
+  background: #07090ddb;
+  border: 1px solid var(--line);
+}
+.start-lights i {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #331b1d;
+}
+.start-lights[data-lit="1"] i:nth-child(-n + 2),
+.start-lights[data-lit="2"] i:nth-child(-n + 4),
+.start-lights[data-lit="3"] i {
+  background: var(--danger);
+  box-shadow: 0 0 16px var(--danger);
+}
+.start-lights[data-lit="go"] i {
+  background: var(--accent);
+  box-shadow: 0 0 16px var(--accent);
+}
+.start-lights.off {
+  display: none;
+}
+@keyframes count-pop {
+  from {
+    transform: scale(1.2);
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes popup-slide {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.nameplates {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.nameplate {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #07090dc9;
+  border-left: 3px solid var(--text-2);
+  white-space: nowrap;
+  will-change: transform;
+}
+.nameplate.friend {
+  color: var(--cool);
+  border-color: var(--cool);
+}
+.chat-feed {
+  position: absolute;
+  left: 40px;
+  bottom: 340px;
+  max-width: 360px;
+}
+.chat-feed p {
+  font-size: 14px;
+  background: #07090dcc;
+  padding: 8px 12px;
+  margin: 4px 0;
+}
+.chat-feed b {
+  color: var(--cool);
+}
+.chat-entry {
+  position: absolute;
+  left: 40px;
+  bottom: 320px;
+  max-width: 340px;
+}
+.speed-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: repeating-conic-gradient(
+    at 50% 45%,
+    transparent 0deg 19deg,
+    #b2e8ff15 19.2deg 19.5deg,
+    transparent 20deg 33deg
+  );
+  mask-image: radial-gradient(transparent 30%, #000 90%);
+  transition: opacity 0.1s;
+}
+.speed-lines.boosting {
+  opacity: 1;
+}
+.impact-flash {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  box-shadow: inset 0 0 160px #ff46328c;
+  pointer-events: none;
+}
+.impact-flash.hit {
+  animation: impact 0.45s ease-out;
+}
+@keyframes impact {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.fps {
+  position: absolute;
+  right: 40px;
+  top: 120px;
+  padding: 10px;
+  font: 13px monospace;
+}
+.touch-controls,
+.touch-utilities {
+  display: none;
+}
+@media (max-width: 1366px) and (min-width: 801px) {
+  .hud-track {
+    max-width: 250px;
+  }
+  .driving-hints {
+    gap: var(--space-3);
+    font-size: 13px;
+    bottom: 20px;
+  }
+  .minimap {
+    bottom: 26px;
+  }
+  .speedometer {
+    bottom: 26px;
+  }
+  .race-position,
+  .standings {
+    left: 28px;
+  }
+  .hud-track,
+  .hud-pause {
+    top: 24px;
+  }
+}
+@media (max-width: 800px), (pointer: coarse) {
+  .touch-controls {
+    display: block;
+  }
+  .touch-controls button {
+    width: 64px;
+    height: 64px;
+    background: #07090dcc;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    touch-action: none;
+    pointer-events: auto;
+  }
+  .touch-controls button.pressed {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .touch-pedals {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    display: grid;
+    grid-template-columns: 64px 64px;
+    gap: var(--space-3);
+  }
+  .touch-controls .touch-gas {
+    background: #c6ff3d33;
+    border-color: var(--accent);
+  }
+  .drag-pad {
+    position: absolute;
+    left: 18px;
+    bottom: 20px;
+    width: 44%;
+    height: 140px;
+    border: 1px solid var(--line-strong);
+    background: #07090d99;
+    border-radius: 40px;
+    touch-action: none;
+    pointer-events: auto;
+    display: grid;
+    place-items: center;
+  }
+  .drag-pad:before {
+    content: "";
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    height: 2px;
+    background: var(--line-strong);
+  }
+  .drag-thumb {
+    width: 64px;
+    height: 64px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    background: #c6ff3d22;
+    transform: translateX(var(--drag, 0px));
+    pointer-events: none;
+  }
+  .drag-pad span {
+    position: absolute;
+    bottom: 8px;
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .drag-pad.pressed .drag-thumb {
+    background: #c6ff3d55;
+  }
+  .touch-arrow-pair {
+    display: none;
+    position: absolute;
+    left: 18px;
+    bottom: 30px;
+    gap: var(--space-3);
+  }
+  .touch-arrows .drag-pad {
+    display: none;
+  }
+  .touch-arrows .touch-arrow-pair {
+    display: flex;
+  }
+  .touch-utilities {
+    display: flex;
+    position: absolute;
+    right: 18px;
+    top: 106px;
+    gap: var(--space-2);
+  }
+  .touch-utilities button {
+    min-width: 64px;
+    height: 48px;
+    font-size: 13px;
+  }
+  .driving-hints {
+    display: none;
+  }
+  .speedometer {
+    bottom: 185px;
+    right: 18px;
+  }
+  .minimap {
+    bottom: 185px;
+    left: 18px;
+  }
+}
+@media (max-width: 800px) {
+  .race-position {
+    left: 18px;
+    top: 18px;
+    padding: 10px 12px;
+    gap: var(--space-2);
+  }
+  .race-position strong {
+    font-size: 48px;
+  }
+  .race-position > span {
+    font-size: 22px;
+  }
+  #position-arrow {
+    font-size: 20px;
+  }
+  .race-laps {
+    left: auto;
+    right: 18px;
+    top: 18px;
+    transform: none;
+    min-width: 160px;
+    padding: 10px 12px;
+  }
+  .race-laps > span:first-child {
+    font-size: 16px;
+  }
+  .race-laps > strong {
+    font-size: 28px;
+  }
+  .race-laps > small {
+    font-size: 13px;
+  }
+  .hud-track {
+    display: none;
+  }
+  .hud-pause {
+    left: 18px;
+    top: 102px;
+    right: auto;
+    width: 48px;
+    height: 48px;
+  }
+  .standings {
+    left: 18px;
+    top: 170px;
+    width: 195px;
+    gap: var(--space-2);
+  }
+  .standings li {
+    min-height: 30px;
+    padding: 5px 8px;
+    gap: var(--space-2);
+  }
+  .standings li > b {
+    font-size: 15px;
+  }
+  .standings li small {
+    font-size: 14px;
+  }
+  .standings li:nth-child(n + 4):not(.me) {
+    display: none;
+  }
+  .standings li > span {
+    font-size: 18px;
+  }
+  .speedometer {
+    width: 196px;
+    padding: 10px 12px 16px;
+  }
+  .rpm-arc {
+    width: 172px;
+    height: 150px;
+  }
+  .speed-value {
+    top: 43px;
+  }
+  .speed-value > span {
+    font-size: 72px;
+  }
+  .speed-value > small {
+    font-size: 14px;
+  }
+  .speed-value > b {
+    right: 0;
+    top: 50px;
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+  }
+  .shift-lights {
+    top: 140px;
+    gap: var(--space-2);
+  }
+  .shift-lights i {
+    width: 6px;
+  }
+  .rpm-track {
+    margin: 0 6px 10px;
+  }
+  .nitro-label,
+  .nitro-label b {
+    font-size: 13px;
+  }
+  .nitro-track {
+    height: 9px;
+    margin-top: 8px;
+  }
+  .minimap {
+    width: 142px;
+    padding: 0 0 8px;
+  }
+  .minimap canvas {
+    width: 142px;
+    height: 142px;
+  }
+  .minimap > span {
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+  .race-center {
+    top: 32%;
+    left: 8%;
+    right: 8%;
+  }
+  #countdown {
+    font-size: 140px;
+  }
+  #score-popup,
+  #drift-score {
+    font-size: 28px;
+  }
+  #mode-timer {
+    font-size: 18px;
+  }
+  .start-lights {
+    top: 27%;
+    gap: var(--space-3);
+    padding: 12px;
+  }
+  .start-lights i {
+    width: 18px;
+    height: 18px;
+  }
+  .chat-feed {
+    left: 18px;
+    bottom: 360px;
+    max-width: 250px;
+  }
+  .chat-entry {
+    left: 18px;
+    bottom: 330px;
+    max-width: 300px;
+  }
+  .fps {
+    top: 155px;
+    right: 18px;
+    font-size: 13px;
+    max-width: 170px;
+  }
+  #wrong-way:not(:empty) {
+    top: 27%;
+    font-size: 28px;
+    padding: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .race-hud * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+@media (max-width: 800px) {
+  .hud-pause {
+    width: 64px;
+    height: 64px;
+  }
+  .touch-utilities button {
+    height: 64px;
+  }
+  .minimap {
+    width: 36%;
+  }
+  .minimap canvas {
+    width: 100%;
+    height: auto;
+  }
+  .speedometer {
+    width: 50%;
+  }
+  .rpm-arc {
+    width: 100%;
+    height: 130px;
+  }
+}

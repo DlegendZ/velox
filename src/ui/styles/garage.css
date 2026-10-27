@@ -1,0 +1,420 @@
+/* Explicit panel regions leave the central canvas available for orbit drag. */
+#app .garage-page {
+  pointer-events: none;
+}
+.garage-page {
+  height: calc(100dvh - 120px);
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr) minmax(320px, 380px);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: "head head head" "rail stage info" "rail strip info";
+  gap: var(--space-5);
+  padding: 24px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.garage-page .page-heading {
+  grid-area: head;
+  margin: 0;
+  pointer-events: auto;
+}
+.garage-rail {
+  grid-area: rail;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  pointer-events: auto;
+  min-width: 0;
+  overflow: auto;
+}
+.garage-tabs button {
+  min-height: 56px;
+  padding: 12px 16px;
+  font-size: 14px;
+  text-align: left;
+  background: #07090ddd;
+  color: var(--text-2);
+  border-left: 3px solid transparent;
+}
+.garage-tabs button::before {
+  content: "◇";
+  margin-right: 12px;
+  font-size: 20px;
+}
+.garage-tabs .active {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.garage-stage {
+  grid-area: stage;
+  min-width: 0;
+  min-height: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.orbit-hint {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-2);
+  background: #07090d99;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.garage-info {
+  grid-area: info;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  padding: 24px;
+  pointer-events: auto;
+  position: relative;
+  border-left: 3px solid var(--accent);
+  background: #0d1118ef;
+}
+.garage-info h2 {
+  font: 700 36px var(--font-display);
+  margin: 12px 0 20px;
+  overflow-wrap: anywhere;
+}
+.spec-line {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.spec-line span {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.spec-line b {
+  font: 600 34px var(--font-num);
+  color: var(--text-1);
+}
+.stat-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 24px 0;
+}
+.stat-bars > div {
+  display: grid;
+  grid-template-columns: 100px 1fr 28px;
+  align-items: center;
+  gap: var(--space-3);
+}
+.stat-bars span {
+  font-size: 13px;
+  color: var(--text-2);
+}
+.stat-bars i {
+  position: relative;
+  height: 5px;
+  background: var(--bg-3);
+  display: block;
+}
+.stat-bars i b {
+  position: absolute;
+  height: 100%;
+  background: var(--text-2);
+}
+.stat-bars i b.boost {
+  background: var(--accent);
+}
+.stat-bars strong {
+  font: 600 20px var(--font-num);
+}
+.garage-activate {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+  margin-top: 24px;
+}
+.garage-activate .class-badge {
+  align-self: flex-start;
+  font-size: 22px;
+}
+.garage-activate .button {
+  width: 100%;
+}
+.garage-tools {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.garage-strip {
+  grid-area: strip;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: var(--space-2);
+  pointer-events: auto;
+}
+.garage-arrow {
+  height: 56px;
+  background: var(--bg-2);
+  font-size: 22px;
+}
+.car-list {
+  min-width: 0;
+  display: flex;
+  gap: var(--space-3);
+  padding: 8px 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 16px;
+}
+.car-row {
+  flex: 0 0 200px;
+  width: 200px;
+  height: 150px;
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: #0d1118ef;
+  border: 2px solid transparent;
+  text-align: left;
+  scroll-snap-align: start;
+}
+.car-row.selected {
+  border-color: var(--accent);
+}
+.car-row > span {
+  min-width: 0;
+  width: 100%;
+}
+.car-row b {
+  display: block;
+  font: 600 19px var(--font-display);
+  white-space: nowrap;
+}
+.car-row small {
+  font-size: 12px;
+  color: var(--text-2);
+}
+.car-row .row-tail {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: auto;
+  font-size: 12px;
+  color: var(--gold);
+  min-height: 18px;
+}
+.car-thumbnail {
+  display: block;
+  height: 50px;
+  flex: 0 0 50px;
+}
+.car-thumbnail img,
+.car-thumbnail svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.upgrade-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.upgrade-row b {
+  display: block;
+  font-size: 16px;
+}
+.upgrade-row small {
+  display: block;
+  font-size: 13px;
+  color: var(--text-2);
+  margin-top: 5px;
+}
+.upgrade-pips {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: 14px;
+}
+.upgrade-pips i {
+  width: 28px;
+  height: 6px;
+  background: var(--bg-3);
+}
+.upgrade-pips i.filled {
+  background: var(--accent);
+}
+.upgrade-pips i.preview {
+  background: #c6ff3d33;
+}
+.upgrade-buy {
+  min-width: 130px;
+  background: var(--bg-3);
+  padding: 10px;
+  font: 600 18px var(--font-num);
+  color: var(--accent);
+}
+.upgrade-buy:disabled {
+  opacity: 0.65;
+  color: var(--text-2);
+}
+.upgrade-buy small {
+  font: 400 13px var(--font-ui);
+}
+.customize {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.customize label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: 13px;
+  color: var(--text-2);
+}
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(6, 40px);
+  gap: var(--space-2);
+}
+.swatch {
+  width: 40px;
+  height: 40px;
+  background: var(--swatch);
+  border: 3px solid transparent;
+  border-radius: 50%;
+}
+.swatch.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.color-pair {
+  display: flex;
+  gap: var(--space-5);
+}
+input[type="color"] {
+  width: 56px;
+  height: 40px;
+  background: var(--bg-3);
+  border: 0;
+}
+.customize .segmented button {
+  min-width: 55px;
+}
+.filter-label {
+  font-size: 13px;
+  color: var(--accent);
+}
+
+@media (max-height: 800px) and (min-width: 701px) {
+  .garage-page {
+    padding: 16px 24px;
+    gap: var(--space-4);
+  }
+  .garage-page .page-heading {
+    margin: 0;
+  }
+  .garage-info {
+    padding: 18px;
+  }
+  .garage-info > .eyebrow,
+  .garage-info .stat-bars {
+    display: none;
+  }
+  .garage-info h2 {
+    font-size: 30px;
+    margin: 0 0 16px;
+  }
+  .spec-line b {
+    font-size: 28px;
+  }
+  .garage-activate {
+    margin-top: 16px;
+    gap: var(--space-3);
+  }
+  .car-row {
+    height: 120px;
+    padding: 12px 16px 8px;
+    gap: var(--space-2);
+  }
+  .car-thumbnail {
+    height: 30px;
+    flex-basis: 30px;
+  }
+  .car-row b {
+    font-size: 17px;
+  }
+}
+@media (max-width: 1100px) and (min-width: 701px) {
+  .garage-page {
+    grid-template-columns: 160px minmax(0, 1fr) 300px;
+    gap: var(--space-4);
+    padding: 16px;
+  }
+  .garage-info {
+    padding: 16px;
+  }
+  .garage-tabs button {
+    padding: 12px 8px;
+  }
+}
+@media (max-width: 700px) {
+  .garage-page {
+    height: calc(100dvh - 120px);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: max-content max-content 40vh max-content max-content;
+    align-content: start;
+    grid-template-areas: "head" "rail" "stage" "info" "strip";
+    padding: 16px;
+    gap: var(--space-4);
+    overflow-y: auto;
+  }
+  .garage-rail {
+    flex-direction: row;
+    gap: var(--space-2);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px;
+  }
+  .garage-tabs button {
+    flex: 0 0 auto;
+    padding: 12px;
+    min-height: 56px;
+    font-size: 12px;
+    white-space: nowrap;
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+  }
+  .garage-tabs button::before {
+    display: none;
+  }
+  .garage-info {
+    overflow: visible;
+    padding: 20px;
+  }
+  .garage-info h2 {
+    font-size: 32px;
+  }
+  .spec-line b {
+    font-size: 32px;
+  }
+  .garage-strip {
+    margin-bottom: 72px;
+  }
+  .swatches {
+    grid-template-columns: repeat(5, 40px);
+  }
+  .upgrade-row {
+    flex-wrap: wrap;
+  }
+  .upgrade-buy {
+    min-height: 44px;
+  }
+}
