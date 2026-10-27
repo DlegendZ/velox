@@ -1,5 +1,12 @@
 # VELOX changelog
 
+## 0.10.1 — Phone controls and roomier phone screens
+
+- Touch driving: steering uses ◀ ▶ buttons by default (the drag pad is an option under Controls). A thumb can roll from GAS onto N2O, DRIFT or BRAKE without lifting, and N2O and DRIFT keep the throttle on, so one thumb boosts or drifts at full gas while the other steers. Presses give a short vibration where supported.
+- Long-pressing a pedal or the 3D view no longer opens the browser's context menu (back, forward, download image), text selection or drag.
+- CAM and RESET sit beside the pause button in the top-right corner, away from both thumbs.
+- Phone screens have their own arrangement with smaller type and controls and more space between panels. The circuit and conditions steps, pause, results, online entry, meet-up and garage now fit without scrolling from 667x375 to 932x430; only long lists (career, settings, profile, upgrades, customize) scroll.
+
 ## 0.10.0 — Phones, in landscape
 
 - VELOX plays on phones in landscape. Upright phones show a TURN YOUR PHONE prompt (and a race pauses if the phone is turned mid-race); on Android the first tap goes fullscreen and locks landscape. Adding the site to the home screen opens it fullscreen in landscape.

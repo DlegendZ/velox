@@ -1148,7 +1148,7 @@ export class Game {
       if (k === "deadzone") this.input.deadzone = s.deadzone = Number(el.value);
       if (k === "hudScale") s.hudScale = Number(el.value);
       if (k === "colorSafe") s.colorSafe = el.checked;
-      if (k === "touchArrows") s.touchArrows = el.checked;
+      if (k === "touchDrag") s.touchDrag = el.checked;
       if (k === "showControlHints") s.showControlHints = el.checked;
       this.save.persist();
     }

@@ -108,9 +108,9 @@ export function settingsContent(g: Game) {
         ),
       ) +
       row(
-        "Touch arrow buttons",
-        "Use arrows instead of the analog drag pad.",
-        toggle("touchArrows", s.touchArrows, 'data-setting="touchArrows"'),
+        "Drag pad steering",
+        "Steer by sliding a thumb instead of the arrow buttons.",
+        toggle("touchDrag", s.touchDrag, 'data-setting="touchDrag"'),
       ) +
       `<div class="binding-grid">${Object.entries(s.bindings)
         .map(

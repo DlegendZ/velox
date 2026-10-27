@@ -59,6 +59,14 @@ try {
       });
     }
     if (width === 390) {
+      // Arrow buttons are the default; the drag pad is the option.
+      assert.equal(await page.locator("[data-touch=right]").isVisible(), true);
+      await page.evaluate(() => {
+        const g = window.__velox;
+        g.save.data.settings.touchDrag = true;
+        g.screen();
+        g.updateHUD();
+      });
       const pad = await page.locator("[data-drag-pad]").boundingBox(),
         x = pad.x + pad.width / 2,
         y = pad.y + pad.height / 2;
@@ -76,7 +84,7 @@ try {
       );
       await page.evaluate(() => {
         const g = window.__velox;
-        g.save.data.settings.touchArrows = true;
+        g.save.data.settings.touchDrag = false;
         g.screen();
         g.updateHUD();
       });

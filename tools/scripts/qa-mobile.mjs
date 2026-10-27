@@ -84,14 +84,22 @@ for (const size of sizes) {
         .filter(visible)
         .filter((e) => {
           const b = e.getBoundingClientRect();
-          return b.top < innerHeight && b.bottom > 0 && (b.height < 40 || b.width < 40);
+          return b.top < innerHeight && b.bottom > 0 && (b.height < 36 || b.width < 36);
         })
         .map((e) => `${e.dataset.action ?? e.dataset.touch ?? e.textContent.trim().slice(0, 16)} ${Math.round(e.getBoundingClientRect().width)}x${Math.round(e.getBoundingClientRect().height)}`);
-      return { lost, small, hscroll: document.documentElement.scrollWidth > innerWidth + 1 };
+      // How far the page's own scroller overflows (a few px means it should just fit).
+      const scroller = [...app.querySelectorAll("main, .pause-panel, .garage-info-content")]
+        .filter((e) => /auto|scroll/.test(getComputedStyle(e).overflowY))
+        .map((e) => e.scrollHeight - e.clientHeight)
+        .reduce((a, b) => Math.max(a, b), 0);
+      return { lost, small, scroller, hscroll: document.documentElement.scrollWidth > innerWidth + 1 };
     });
     check(r.lost.length === 0, `${size} ${state} controls reachable ${r.lost.join(", ")}`);
-    check(r.small.length === 0, `${size} ${state} touch targets ≥40px ${r.small.slice(0, 6).join(", ")}`);
+    check(r.small.length === 0, `${size} ${state} touch targets ≥36px ${r.small.slice(0, 6).join(", ")}`);
     check(!r.hscroll, `${size} ${state} no sideways page scroll`);
+    // Either it fits, or it overflows enough that scrolling is clearly intended.
+    check(r.scroller <= 1 || r.scroller > 60 || process.env.ALLOW_SMALL_SCROLL, `${size} ${state} no near-miss scroll (${r.scroller}px)`);
+    console.log(`  ${size} ${state}: overflow ${r.scroller}px`);
   }
   check(errors.length === 0, `${size} no page errors ${errors.slice(0, 2).join(" | ")}`);
   await context.close();

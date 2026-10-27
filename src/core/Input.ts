@@ -18,6 +18,14 @@ export class Input {
   onAction = (action: string) => {};
   capture: ((key: string) => void) | null = null;
   private padButtons: boolean[] = [];
+  /** Touch pointer → the control under that finger. A finger may slide between buttons. */
+  private fingers = new Map<number, string>();
+  private syncTouch() {
+    this.touch = new Set(this.fingers.values());
+    document.querySelectorAll<HTMLElement>("[data-touch]").forEach((b) =>
+      b.classList.toggle("pressed", this.touch.has(b.dataset.touch!)),
+    );
+  }
   constructor(private bindings: () => Record<string, string>) {
     window.addEventListener("keydown", (e) => {
       if (this.capture) {
@@ -57,11 +65,24 @@ export class Input {
       if (el) {
         e.preventDefault();
         el.setPointerCapture(e.pointerId);
-        this.touch.add(el.dataset.touch!);
-        el.classList.add("pressed");
+        this.fingers.set(e.pointerId, el.dataset.touch!);
+        this.syncTouch();
+        navigator.vibrate?.(8);
       }
     });
     document.addEventListener("pointermove", (e) => {
+      if (this.fingers.has(e.pointerId)) {
+        // Rolling a thumb onto the next button switches to it without lifting;
+        // over a gap the last button stays held.
+        const over = document
+          .elementFromPoint(e.clientX, e.clientY)
+          ?.closest<HTMLElement>("[data-touch]")?.dataset.touch;
+        if (over && over !== this.fingers.get(e.pointerId)) {
+          this.fingers.set(e.pointerId, over);
+          this.syncTouch();
+        }
+        return;
+      }
       if (e.pointerId !== this.dragId) return;
       this.dragSteer = Math.max(
         -1,
@@ -83,17 +104,12 @@ export class Input {
           pad?.classList.remove("pressed");
           pad?.style.setProperty("--drag", "0px");
         }
-        const el = (e.target as HTMLElement).closest<HTMLElement>(
-          "[data-touch]",
-        );
-        if (el) {
-          this.touch.delete(el.dataset.touch!);
-          el.classList.remove("pressed");
-        }
+        if (this.fingers.delete((e as PointerEvent).pointerId)) this.syncTouch();
       });
   }
   clear() {
     this.keys.clear();
+    this.fingers.clear();
     this.touch.clear();
     this.steer = 0;
     this.dragId = null;
@@ -108,7 +124,12 @@ export class Input {
     const pad = navigator.getGamepads?.().find((p) => p?.connected);
     let steer =
       Number(has("right", "ArrowRight")) - Number(has("left", "ArrowLeft"));
-    let throttle = Number(has("throttle", "ArrowUp")),
+    // On touch, N2O and DRIFT keep the throttle down: one thumb cannot hold two buttons.
+    let throttle = Number(
+        has("throttle", "ArrowUp") ||
+          this.touch.has("nitro") ||
+          this.touch.has("handbrake"),
+      ),
       brake = Number(has("brake", "ArrowDown"));
     let handbrake = has("handbrake"),
       nitro = has("nitro") || this.keys.has("ShiftRight"),

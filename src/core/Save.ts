@@ -107,7 +107,8 @@ export interface SaveData {
     hudScale: number;
     deadzone: number;
     colorSafe: boolean;
-    touchArrows: boolean;
+    /** Steer by sliding on a pad instead of the left/right buttons. */
+    touchDrag: boolean;
     hintRaces: number;
     showControlHints: boolean;
   };
@@ -186,7 +187,7 @@ export function defaultSave(): SaveData {
       hudScale: 100,
       deadzone: 0.1,
       colorSafe: false,
-      touchArrows: false,
+      touchDrag: false,
       hintRaces: 0,
       showControlHints: false,
     },
@@ -343,7 +344,8 @@ export function migrateSave(raw: unknown): SaveData {
     d.settings.hudScale = number(s.hudScale, 100, 80, 130);
     d.settings.deadzone = number(s.deadzone, 0.1, 0.02, 0.35);
     d.settings.colorSafe = s.colorSafe === true;
-    d.settings.touchArrows = s.touchArrows === true;
+    // Arrow buttons are the default; the old touchArrows flag is dropped.
+    d.settings.touchDrag = s.touchDrag === true;
     d.settings.hintRaces = Math.floor(number(s.hintRaces, 0, 0));
     d.settings.showControlHints = s.showControlHints === true;
   }

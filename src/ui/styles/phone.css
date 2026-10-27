@@ -134,341 +134,73 @@ html.phone #app .back-link {
   min-height: 40px;
 }
 
-/* ---------------------------------------------------------------- main menu */
-html.phone #app .home {
-  grid-template-columns: minmax(0, 40%) minmax(0, 1fr) minmax(0, 28%);
-  gap: 12px;
-  align-items: stretch;
-}
-html.phone #app .home-menu {
-  overflow-y: auto;
-  max-height: 100%;
-  padding-right: 6px;
-}
-html.phone #app .home-menu > .eyebrow {
-  margin: 0 0 4px;
-}
-html.phone #app .home-entry {
-  min-height: 44px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-html.phone #app .home-entry b,
-html.phone #app .home-entry strong {
-  font-size: 26px;
-}
-html.phone #app .ride-ticket {
-  align-self: stretch;
-  overflow-y: auto;
-  gap: 8px;
-  justify-content: center;
-}
-html.phone #app :is(.your-ride, .daily-ticket) {
-  padding: 12px;
-}
-
-/* ------------------------------------------------------- race setup (2 steps) */
-html.phone #app .race-setup {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-html.phone #app .race-setup > *,
-html.phone #app .setup-body,
-html.phone #app .track-browser {
-  flex: 0 0 auto;
-  min-height: 0;
-  height: auto;
-  max-height: none;
-}
-html.phone #app .setup-heading {
-  margin: 0;
-}
-html.phone #app .setup-heading h1 {
-  font-size: 26px;
-  margin: 2px 0 0;
-}
-html.phone #app .mode-tab {
-  min-height: 44px;
-}
-html.phone #app .carousel {
-  height: 220px;
-  min-height: 220px;
-  flex: 0 0 220px;
-}
-html.phone #app .carousel-slot .track-card {
-  min-height: 0;
-}
-html.phone #app .conditions-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 12px;
-  height: auto;
-  min-height: 0;
-}
-html.phone #app .conditions-layout > * {
-  min-height: 0;
-  height: auto;
-  max-height: none;
-  overflow: visible;
-}
-html.phone #app .conditions {
-  padding: 14px;
-}
-html.phone #app .setup-next-row {
-  position: sticky;
-  bottom: -18px;
-  padding: 8px 0;
-  background: linear-gradient(transparent, #07090d 40%);
-  z-index: 2;
-}
-
-/* ------------------------------------------------------------------ garage */
-html.phone #app .garage-page,
-html.phone #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) {
-  grid-template-columns: 132px minmax(0, 1fr) minmax(250px, 320px);
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  grid-template-areas: "head head info" "rail stage info" "rail strip info";
-  gap: 8px 12px;
-}
-html.phone #app .garage-page .page-heading {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-html.phone #app .garage-page .page-heading h1 {
-  font-size: 22px;
-}
-html.phone #app .garage-tabs button {
-  min-height: 44px;
-  padding: 8px 10px;
-  font-size: 13px;
-}
-html.phone #app .garage-tabs button::before {
-  margin-right: 6px;
-  font-size: 14px;
-}
-html.phone #app .garage-page .garage-strip,
-html.phone #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) .garage-strip {
-  display: grid;
-  grid-area: strip;
-  grid-template-columns: 44px minmax(0, 1fr) 44px;
-}
-html.phone #app .garage-arrow {
-  width: 44px;
-  height: 44px;
-}
-html.phone #app .car-row {
-  width: 150px;
-  flex-basis: 150px;
-  height: 104px;
-  min-height: 104px;
-}
-html.phone #app .car-row .car-thumbnail {
-  height: 60px;
-  flex: 0 0 60px;
-}
-html.phone #app .garage-info {
-  grid-area: info;
-  align-self: stretch;
-  height: 100%;
-  max-height: 100%;
-  padding: 12px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-html.phone #app .garage-info-content {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-}
-html.phone #app .garage-info h2 {
-  font-size: 22px;
-}
-html.phone #app .orbit-hint {
-  display: none;
-}
-
-/* ----------------------------------------------------------------- results */
-html.phone #app .results-page {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-html.phone #app .results-page > * {
-  flex: 0 0 auto;
-}
-html.phone #app .result-heading h1 {
-  font-size: 34px;
-}
-html.phone #app .result-columns {
-  height: auto;
-  min-height: 0;
-  max-height: none;
-}
-html.phone #app .result-card {
-  max-height: none;
-  overflow: visible;
-}
-html.phone #app .result-actions {
-  position: sticky;
-  bottom: -18px;
-  z-index: 2;
-  padding: 8px 0;
-  background: linear-gradient(transparent, #07090d 35%);
-}
-html.phone #app .result-actions .button {
-  min-height: 52px;
-}
-
-/* ------------------------------------------------------------------ online */
-html.phone #app .meet-page {
-  overflow-y: auto;
-}
-html.phone #app .meet-grid {
-  flex: 0 0 auto;
-  grid-template-columns: minmax(250px, 0.9fr) minmax(0, 1.4fr);
-  grid-template-rows: auto auto auto;
-  grid-template-areas: "room race" "drivers race" "chat chat";
-}
-html.phone #app .meet-race {
-  min-height: 330px;
-}
-html.phone #app .meet-race-body {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
-}
-html.phone #app .meet-grid .chat-panel {
-  min-height: 200px;
-}
-html.phone #app .card-head .text-button {
-  min-height: 44px;
-}
-html.phone #app .net-entry .net-card {
-  min-height: 0;
-  padding: 16px;
-}
-html.phone #app input.room-input {
-  height: 56px;
-  min-height: 56px;
-  font-size: 30px;
-}
-
-/* -------------------------------------------------------------- race HUD */
-html.phone #app .touch-utilities .plate {
-  min-width: 52px;
-}
-
-/* ------------------------------------------------------------- round two */
-html.phone #app .home-entry {
-  min-height: 44px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-}
-html.phone #app .home-entry :is(b, strong, h2, h3) {
-  font-size: 22px;
-  line-height: 1.1;
-}
-/* Setup: the breadcrumb names the step, so the big title gives its room to the cards. */
-html.phone #app .race-setup .setup-heading h1,
-html.phone #app .race-setup .carousel-commands {
-  display: none;
-}
-html.phone #app .carousel {
-  height: 190px;
-  min-height: 190px;
-  flex-basis: 190px;
-}
-html.phone #app .setup-track .setup-next-row {
-  position: static;
-  background: none;
-  padding: 0;
-}
-html.phone #app .garage-tabs button {
-  font-size: 12px;
-  letter-spacing: 0.04em;
-}
-/* Pause: compact panel, the circuit map and order stay beside it. */
-html.phone #app .pause-layout {
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
-  gap: 12px;
-  padding: 10px max(16px, env(safe-area-inset-right)) 10px
-    max(16px, env(safe-area-inset-left));
-  height: 100dvh;
-  max-height: 100dvh;
-}
-html.phone #app :is(.pause-panel, .pause-side) {
-  overflow-y: auto;
-  max-height: calc(100dvh - 20px);
-  padding: 14px;
-}
-html.phone #app .pause-panel h1 {
-  font-size: 34px;
-  margin: 2px 0 8px;
-}
-html.phone #app .pause-chips {
-  margin-bottom: 8px;
-}
-html.phone #app .pause-entry {
-  min-height: 48px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-html.phone #app .pause-side .pause-map svg {
-  max-height: 120px;
-}
-/* Online: settings over the map, nothing truncated. */
-html.phone #app .meet-race-body {
-  grid-template-columns: minmax(0, 1fr);
-}
-html.phone #app .meet-race .lobby-map {
-  height: 190px;
-}
-html.phone #app .net-steps {
-  display: none;
-}
-html.phone #app .net-entry {
-  gap: 12px;
-}
-html.phone #app .net-footer {
-  margin-top: 12px;
-}
 /* Race: the HUD is drawn at --hud-scale, so touch sizes divide by it to stay
-   thumb-sized on screen. Utilities sit under the position plate. */
+   thumb-sized on screen. Left thumb: two steering buttons. Right thumb: a tight
+   2x2 pedal block (N2O right above GAS) so the thumb can roll between them. */
+/* CAM and RESET join the pause button in the top-right corner, away from both
+   thumbs; the circuit name plate they replace is in the pause menu anyway. */
+html.phone #app .hud-track {
+  display: none;
+}
 html.phone #app .touch-utilities {
-  left: var(--hud-safe);
-  right: auto;
-  top: calc(var(--hud-safe) + 70px / var(--hud-scale));
+  left: auto;
+  right: calc(var(--hud-safe) + 56px / var(--hud-scale));
+  top: var(--hud-safe);
   bottom: auto;
   transform: none;
+  gap: calc(8px / var(--hud-scale));
 }
 html.phone #app .touch-utilities button {
   width: auto;
-  padding: 0 calc(10px / var(--hud-scale));
-  min-width: calc(60px / var(--hud-scale));
-  height: calc(44px / var(--hud-scale));
-  font-size: calc(13px / var(--hud-scale));
+  padding: 0 calc(12px / var(--hud-scale));
+  min-width: calc(58px / var(--hud-scale));
+  height: calc(48px / var(--hud-scale));
+  font-size: calc(12px / var(--hud-scale));
+}
+html.phone #app .touch-arrow-pair {
+  left: calc(18px / var(--hud-scale));
+  bottom: calc(16px / var(--hud-scale));
+  gap: calc(14px / var(--hud-scale));
+}
+html.phone #app .touch-arrow-pair button {
+  width: calc(86px / var(--hud-scale));
+  height: calc(86px / var(--hud-scale));
+  font-size: calc(26px / var(--hud-scale));
+  border-radius: calc(14px / var(--hud-scale));
 }
 html.phone #app .touch-pedals {
   right: calc(16px / var(--hud-scale));
-  bottom: calc(12px / var(--hud-scale));
-  grid-template-columns: calc(70px / var(--hud-scale)) calc(84px / var(--hud-scale));
-  gap: calc(8px / var(--hud-scale));
+  bottom: calc(16px / var(--hud-scale));
+  grid-template-columns: calc(72px / var(--hud-scale)) calc(92px / var(--hud-scale));
+  gap: calc(6px / var(--hud-scale));
 }
 html.phone #app .touch-pedals button {
   width: 100%;
-  height: calc(50px / var(--hud-scale));
+  height: calc(52px / var(--hud-scale));
   font-size: calc(13px / var(--hud-scale));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+  border-radius: calc(12px / var(--hud-scale));
+}
+html.phone #app .touch-pedals button small {
+  font-size: calc(12px / var(--hud-scale));
+  opacity: 0.6;
+  font-weight: 500;
 }
 html.phone #app .touch-pedals :is([data-touch="brake"], [data-touch="throttle"]) {
-  height: calc(80px / var(--hud-scale));
+  height: calc(86px / var(--hud-scale));
+}
+html.phone #app .touch-pedals [data-touch="nitro"] {
+  border-color: rgba(79, 216, 255, 0.6);
 }
 html.phone #app .drag-pad {
   left: calc(16px / var(--hud-scale));
-  bottom: calc(12px / var(--hud-scale));
+  bottom: calc(14px / var(--hud-scale));
   width: 40%;
-  height: calc(120px / var(--hud-scale));
+  height: calc(110px / var(--hud-scale));
 }
 html.phone #app .drag-thumb {
   width: calc(56px / var(--hud-scale));
@@ -483,32 +215,801 @@ html.touch #app kbd {
   display: none;
 }
 html.phone #app .speedometer {
-  bottom: calc(162px / var(--hud-scale));
-}
-html.phone #app .pause-layout {
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  bottom: calc(168px / var(--hud-scale));
 }
 
-/* Narrow phones (iPhone SE/8 landscape and similar). */
-html.phone #app .conditions-layout {
-  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
-}
-html.phone #app .conditions .segmented {
-  flex-wrap: wrap;
-}
-html.phone #app .conditions .segmented button {
-  min-width: 44px;
-}
-html.phone #app .garage-page,
-html.phone #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) {
-  grid-template-columns: 132px minmax(0, 1fr) minmax(220px, 36vw);
-}
 html.phone #app .speedometer {
   transform: scale(0.8);
   transform-origin: 100% 100%;
 }
-html.phone #app .garage-info .spec-line b {
+
+/* ================================================================ phone screens
+   Phones get their own arrangement rather than a squeezed desktop one: one-row
+   headings, smaller type and controls, more air between panels. Screens that hold
+   a fixed set of controls fit the viewport; long lists (career, settings, garage
+   tools, profile) scroll inside their own panel. */
+html.phone {
+  --phone-gap: 12px;
+  --phone-pad: 14px;
+}
+html.phone #app .page-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 var(--phone-gap);
+  min-height: 36px;
+}
+html.phone #app .page-heading :is(.eyebrow, .description) {
+  display: none;
+}
+html.phone #app .page-heading h1 {
+  margin: 0;
   font-size: 22px;
+  line-height: 1;
+}
+html.phone #app .back-link {
+  min-height: 36px;
+  font-size: 13px;
+}
+html.phone #app .button {
+  min-height: 42px;
+  font-size: 14px;
+  padding-inline: 18px;
+}
+html.phone #app :is(.settings-panel, .net-card, .result-card) {
+  padding: var(--phone-pad);
+}
+html.phone #app :is(.settings-panel, .net-card) h2 {
+  font-size: 20px;
+}
+
+/* ------------------------------------------------------------------- menu */
+html.phone #app .home {
+  grid-template-columns: minmax(0, 38%) minmax(0, 1fr) minmax(0, 27%);
+  gap: 16px;
+  padding-top: 14px;
+}
+html.phone #app .home-menu {
+  overflow-y: auto;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+html.phone #app .home-menu > .eyebrow {
+  margin: 0 0 6px;
+}
+html.phone #app .home-entry {
+  min-height: 42px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+html.phone #app .home-entry :is(span, b, strong) {
+  font-size: 21px;
+  line-height: 1.1;
+}
+html.phone #app .ride-ticket {
+  align-self: center;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 100%;
+}
+html.phone #app :is(.your-ride, .daily-ticket) {
+  padding: 12px;
+}
+html.phone #app :is(.your-ride, .daily-ticket) :is(h2, strong) {
+  font-size: 18px;
+}
+
+/* ---------------------------------------------------------- setup: circuit */
+html.phone #app .race-setup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--phone-gap);
+  overflow: hidden;
+}
+html.phone #app .race-setup > * {
+  flex: 0 0 auto;
+  margin: 0;
+}
+html.phone #app .setup-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+html.phone #app .setup-heading :is(h1, p) {
+  display: none;
+}
+html.phone #app .mode-strip {
+  gap: 6px;
+}
+html.phone #app .mode-tab {
+  min-height: 40px;
+  font-size: 13px;
+}
+html.phone #app .setup-track .track-browser {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+html.phone #app .setup-track .carousel {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 120px;
+}
+html.phone #app .carousel-commands {
+  display: none;
+}
+html.phone #app .setup-next-row {
+  position: static;
+  padding: 0;
+  background: none;
+  gap: 14px;
+}
+html.phone #app .setup-next-row p {
+  font-size: 13px;
+}
+
+/* ------------------------------------------------------- setup: conditions */
+html.phone #app .setup-conditions .conditions-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(200px, 0.8fr) minmax(0, 1.6fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas: "summary options" "start options";
+  gap: var(--phone-gap) 16px;
+}
+html.phone #app .setup-conditions .conditions {
+  display: contents;
+}
+html.phone #app .setup-conditions .conditions > h2 {
+  display: none;
+}
+html.phone #app .setup-conditions .setup-track-summary {
+  grid-area: summary;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+html.phone #app .setup-conditions .summary-art {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+}
+html.phone #app .setup-conditions .summary-detail {
+  padding: 10px 12px;
+}
+html.phone #app .setup-conditions .summary-detail h2 {
+  font-size: 17px;
+  margin: 2px 0 6px;
+}
+html.phone #app .setup-conditions :is(.summary-stats, .change-track) {
+  display: none;
+}
+html.phone #app .setup-conditions .panel-actions {
+  grid-area: start;
+  margin: 0;
+}
+html.phone #app .setup-conditions .panel-actions .button {
+  width: 100%;
+  margin: 0;
+}
+html.phone #app .setup-conditions .condition-options {
+  grid-area: options;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--bg-1);
+  border-left: 3px solid var(--accent);
+}
+html.phone #app .condition-row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+html.phone #app .condition-row > span {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+html.phone #app .condition-row .segmented {
+  gap: 4px;
+  flex-wrap: nowrap;
+}
+html.phone #app .condition-row .segmented button {
+  min-height: 40px;
+  min-width: 0;
+  flex: 1 1 0;
+  padding: 0 4px;
+  font-size: 12px;
+}
+html.phone #app .condition-row .stepper button {
+  width: 40px;
+  height: 40px;
+}
+
+/* ------------------------------------------------------------------- garage */
+html.phone #app .garage-page,
+html.phone #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) {
+  grid-template-columns: 124px minmax(0, 1fr) minmax(220px, 34vw);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: "head head info" "rail stage info" "rail strip info";
+  gap: var(--phone-gap) 14px;
+}
+html.phone #app .garage-tabs {
+  gap: 6px;
+}
+html.phone #app .garage-tabs button {
+  min-height: 40px;
+  padding: 6px 10px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+html.phone #app .garage-tabs button::before {
+  margin-right: 6px;
+  font-size: 13px;
+}
+html.phone #app .garage-page .garage-strip,
+html.phone #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) .garage-strip {
+  display: grid;
+  grid-area: strip;
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  gap: 6px;
+}
+html.phone #app .garage-arrow {
+  width: 40px;
+  height: 40px;
+}
+html.phone #app .car-list {
+  padding: 4px 0;
+  gap: 8px;
+}
+html.phone #app .car-row {
+  width: 132px;
+  flex-basis: 132px;
+  height: 92px;
+  min-height: 92px;
+}
+html.phone #app .car-row .car-thumbnail {
+  height: 52px;
+  flex: 0 0 52px;
+}
+html.phone #app .car-row b {
+  font-size: 13px;
+}
+html.phone #app .garage-info {
+  grid-area: info;
+  align-self: stretch;
+  height: 100%;
+  max-height: 100%;
+  padding: 12px 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+html.phone #app .garage-info-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+html.phone #app .garage-info .eyebrow {
+  margin: 0;
+  font-size: 12px;
+}
+html.phone #app .garage-info h2 {
+  font-size: 19px;
+  margin: 4px 0 8px;
+}
+html.phone #app .garage-info .spec-line {
+  margin: 0 0 8px;
+  gap: 10px;
+}
+html.phone #app .garage-info .spec-line b {
+  font-size: 18px;
+}
+html.phone #app .garage-info .spec-line span {
+  font-size: 12px;
+}
+html.phone #app .garage-info .stat-bars {
+  gap: 4px;
+}
+html.phone #app .garage-info .stat-bars > div {
+  min-height: 0;
+  font-size: 12px;
+}
+html.phone #app .garage-activate {
+  margin: 0;
+  padding: 0;
+  gap: 8px;
+}
+html.phone #app .garage-activate .button {
+  min-height: 42px;
+}
+html.phone #app .orbit-hint {
+  display: none;
+}
+
+/* -------------------------------------------------------------------- pause */
+html.phone #app .pause-layout {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  gap: 14px;
+  padding: 14px max(20px, env(safe-area-inset-right)) 14px
+    max(20px, env(safe-area-inset-left));
+  height: 100dvh;
+  max-height: 100dvh;
+  align-items: stretch;
+}
+html.phone #app :is(.pause-panel, .pause-side) {
+  max-height: none;
+  overflow: hidden;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+html.phone #app .pause-panel > .eyebrow {
+  margin: 0;
+}
+html.phone #app .pause-panel h1 {
+  font-size: 30px;
+  margin: 0;
+  line-height: 1;
+}
+html.phone #app .pause-chips {
+  margin: 0;
+  gap: 8px;
+}
+html.phone #app .pause-chips span {
+  padding: 4px 10px;
+}
+html.phone #app .pause-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: auto 0 0;
+}
+html.phone #app .pause-entry {
+  min-height: 44px;
+  padding: 4px 10px;
+  margin: 0;
+}
+html.phone #app .pause-entry.primary {
+  grid-column: 1 / -1;
+}
+html.phone #app .pause-entry small {
+  display: none;
+}
+html.phone #app .pause-entry b {
+  font-size: 16px;
+}
+html.phone #app .pause-icon {
+  width: 30px;
+  height: 30px;
+}
+html.phone #app .pause-side .pause-map {
+  display: none;
+}
+html.phone #app .pause-side .pause-status {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* ------------------------------------------------------------------ results */
+html.phone #app .results-page {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: var(--phone-gap);
+  overflow: hidden;
+}
+html.phone #app .results-page > .eyebrow {
+  display: none;
+}
+html.phone #app .result-heading {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "title pos" "sub pos";
+  min-height: 0;
+  row-gap: 2px;
+}
+html.phone #app .result-heading h1 {
+  font-size: 28px;
+  margin: 0;
+}
+html.phone #app .result-sub {
+  font-size: 12px;
+  margin: 0;
+}
+html.phone #app .result-position {
+  font-size: 40px;
+  padding: 4px 14px;
+}
+html.phone #app .pb-banner {
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+html.phone #app .result-columns {
+  min-height: 0;
+  height: 100%;
+  gap: var(--phone-gap);
+  margin: 0;
+}
+html.phone #app .result-card {
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+  padding: 10px 12px;
+}
+html.phone #app .result-card .eyebrow {
+  margin: 0 0 6px;
+}
+html.phone #app .result-card h2 {
+  font-size: 15px;
+  margin: 0 0 4px;
+}
+html.phone #app .result-card .result-total,
+html.phone #app .result-card .reward-total {
+  font-size: 26px;
+  margin: 2px 0 6px;
+}
+html.phone #app .result-row {
+  min-height: 0;
+  padding: 3px 0;
+  font-size: 13px;
+}
+html.phone #app .result-actions {
+  position: static;
+  padding: 0;
+  background: none;
+  gap: 8px;
+}
+html.phone #app .result-actions .button {
+  min-height: 44px;
+}
+
+/* --------------------------------------------------------------- online entry */
+html.phone #app .net-entry-page {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+html.phone #app .net-entry {
+  gap: 14px;
+  flex: 0 0 auto;
+}
+html.phone #app .net-entry .net-card {
+  min-height: 0;
+  padding: 14px 16px;
+  gap: 10px;
+}
+html.phone #app .net-entry .net-card .muted {
+  font-size: 13px;
+}
+html.phone #app .net-steps {
+  display: none;
+}
+html.phone #app .net-entry .net-card .button {
+  margin-top: 4px;
+}
+html.phone #app input.room-input {
+  height: 48px;
+  min-height: 48px;
+  font-size: 26px;
+  max-width: none;
+}
+html.phone #app .net-footer {
+  margin-top: 14px;
+  gap: 14px;
+}
+html.phone #app .net-check {
+  padding: 8px 14px;
+}
+html.phone #app .net-check b {
+  font-size: 17px;
+}
+html.phone #app .net-check small {
+  font-size: 12px;
+}
+html.phone #app .net-check .button {
+  min-height: 40px;
+}
+html.phone #app .net-manual {
+  margin-top: 14px;
+  gap: 14px;
+}
+html.phone #app .net-entry-page:has(.net-manual) {
+  overflow-y: auto;
+}
+
+/* ---------------------------------------------------------------- meet-up */
+html.phone #app .meet-page {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+html.phone #app .meet-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-template-columns: minmax(200px, 0.9fr) minmax(0, 1.5fr) minmax(170px, 0.75fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "room race chat" "drivers race chat";
+  gap: var(--phone-gap);
+}
+html.phone #app .meet-grid .net-card {
+  padding: 10px 12px;
+  gap: 8px;
+}
+html.phone #app .room-card .eyebrow {
+  font-size: 12px;
+}
+html.phone #app .room-big {
+  gap: 4px;
+}
+html.phone #app .room-big span {
+  height: 36px;
+  font-size: 22px;
+}
+html.phone #app .room-card .row-buttons .button {
+  min-height: 38px;
+  font-size: 12px;
+  padding-inline: 8px;
+}
+html.phone #app .room-card > p.small {
+  display: none;
+}
+html.phone #app .manual-invite summary {
+  padding: 2px 0;
+}
+html.phone #app .meet-drivers {
+  overflow-y: auto;
+}
+html.phone #app .meet-drivers .lobby-player {
+  min-height: 38px;
+  padding: 3px 8px;
+}
+html.phone #app .meet-drivers .lobby-player.empty {
+  display: none;
+}
+html.phone #app .meet-drivers .lobby-player b {
+  font-size: 14px;
+}
+html.phone #app .meet-drivers .lobby-player small {
+  font-size: 12px;
+}
+html.phone #app .card-head .text-button {
+  min-height: 36px;
+  font-size: 12px;
+}
+html.phone #app .meet-race {
+  min-height: 0;
+  overflow: hidden;
+}
+html.phone #app .meet-race-head h2 {
+  font-size: 16px;
+}
+html.phone #app .meet-race-head .button {
+  min-height: 40px;
+  font-size: 13px;
+  padding-inline: 12px;
+}
+html.phone #app .meet-race-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+}
+html.phone #app .meet-race .lobby-map {
+  order: -1;
+  height: auto;
+  padding: 0;
+  background: none;
+}
+html.phone #app .meet-race .lobby-map svg {
+  display: none;
+}
+html.phone #app .map-picker {
+  gap: 8px;
+}
+html.phone #app .map-picker small {
+  display: none;
+}
+html.phone #app .map-picker b {
+  font-size: 14px;
+  white-space: nowrap;
+}
+html.phone #app .map-picker .garage-arrow {
+  width: 40px;
+  height: 40px;
+}
+html.phone #app .meet-options {
+  gap: 6px;
+  overflow: visible;
+}
+html.phone #app .meet-option,
+html.phone #app .meet-options .condition-row {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+html.phone #app .meet-options .race-options {
+  gap: 6px;
+}
+html.phone #app .meet-options .segmented button {
+  min-height: 38px;
+  font-size: 12px;
+  padding: 0 4px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+html.phone #app .meet-options .stepper button {
+  width: 38px;
+  height: 38px;
+}
+html.phone #app .meet-grid .chat-panel {
+  min-height: 0;
+}
+html.phone #app .meet-grid .chat-panel .chat-log p {
+  font-size: 13px;
+}
+html.phone #app .meet-grid .chat-row input {
+  min-height: 40px;
+  height: 40px;
+}
+html.phone #app .meet-grid .chat-row .button {
+  min-height: 40px;
+  padding-inline: 10px;
+}
+html.phone #app .meet-grid .leave-button {
+  min-height: 36px;
+  font-size: 12px;
+}
+
+/* ------------------------------------------------- long lists stay readable */
+html.phone #app :is(.career-event, .setting-row) {
+  min-height: 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+html.phone #app .settings-layout {
+  gap: 16px;
+}
+html.phone #app .settings-tabs button {
+  min-height: 40px;
+  font-size: 12px;
+}
+
+/* ------------------------------------------------------------- fit fixes */
+/* Seven mode tabs share one row. */
+html.phone #app .mode-strip {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+html.phone #app .mode-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 4px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+html.phone #app .mode-tab b {
+  display: none;
+}
+/* Results: a flex column so the actions always keep their row. */
+html.phone #app .results-page {
+  display: flex;
+  flex-direction: column;
+}
+html.phone #app .results-page > :is(.result-heading, .pb-banner, .result-actions) {
+  flex: 0 0 auto;
+}
+html.phone #app .result-columns {
+  flex: 1 1 auto;
+  height: auto;
+}
+/* Online entry: the join box and its button share a row. */
+html.phone #app .net-join {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "eyebrow eyebrow" "title title" "text text" "input go";
+  align-content: start;
+  column-gap: 10px;
+}
+html.phone #app .net-join > .eyebrow {
+  grid-area: eyebrow;
+}
+html.phone #app .net-join > h2 {
+  grid-area: title;
+}
+html.phone #app .net-join > .muted {
+  grid-area: text;
+}
+html.phone #app .net-join > input {
+  grid-area: input;
+}
+html.phone #app .net-join > :is(.button, .row-buttons) {
+  grid-area: go;
+  margin: 0;
+  align-self: stretch;
+}
+html.phone #app .net-host > .button {
+  margin-top: auto;
+}
+html.phone #app .net-footer {
+  margin-top: 12px;
+}
+/* Garage: badge and action share one row under the stats. */
+html.phone #app .garage-activate {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+html.phone #app .garage-activate .class-badge {
+  flex: 0 0 auto;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+html.phone #app .garage-activate .button {
+  flex: 1 1 auto;
+  margin: 0;
+  padding-inline: 10px;
+  font-size: 13px;
+}
+html.phone #app .garage-tabs button {
+  letter-spacing: 0;
+  padding: 6px 8px;
+}
+html.phone #app .garage-tabs button::before {
+  margin-right: 4px;
+}
+/* Meet-up: the track picker names the circuit, so the heading only starts the race. */
+html.phone #app .meet-race-head > div {
+  display: none;
+}
+html.phone #app .meet-race-head .button {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+html.phone #app .card-head {
+  gap: 8px;
+}
+html.phone #app .meet-grid .leave-button {
+  white-space: normal;
+  text-align: left;
+}
+
+/* ------------------------------------------------------- narrowest phones */
+@media (max-width: 720px) {
+  html.phone #app .meet-grid {
+    grid-template-columns: minmax(190px, 1fr) minmax(0, 1.5fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "room race" "drivers race";
+  }
+  html.phone #app .meet-grid .chat-panel {
+    display: none;
+  }
+  html.phone #app .garage-page,
+  html.phone #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) {
+    grid-template-columns: 112px minmax(0, 1fr) minmax(210px, 36vw);
+  }
+  html.phone #app .setup-conditions .conditions-layout {
+    grid-template-columns: minmax(170px, 0.7fr) minmax(0, 1.6fr);
+  }
+  html.phone #app .condition-row {
+    grid-template-columns: 76px minmax(0, 1fr);
+  }
 }
 
 /* No double-tap zoom, text selection or long-press menus while playing. */
@@ -520,4 +1021,122 @@ html.touch #app :is(button, .race-hud, .home-entry) {
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
+}
+html.touch body,
+html.touch canvas {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+html.touch #app :is(input, textarea) {
+  -webkit-user-select: text;
+  user-select: text;
+}
+html.phone #app .garage-page .garage-activate,
+html.phone #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) .garage-activate {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 8px 0 0;
+}
+html.phone #app .garage-page .garage-activate .button {
+  display: inline-flex;
+  flex: 1 1 auto;
+  margin: 0;
+}
+html.phone #app .garage-info .spec-line span {
+  line-height: 1.1;
+}
+html.phone #app .net-join > .muted {
+  display: none;
+}
+html.phone #app .net-check > div {
+  min-width: 0;
+}
+html.phone #app .net-check small {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-height: 380px) {
+  html.phone #app .garage-info .spec-line {
+    display: none;
+  }
+}
+html.phone #app .net-more {
+  flex: 0 0 auto;
+  font-size: 12px;
+  white-space: nowrap;
+  min-height: 40px;
+}
+@media (max-width: 760px) {
+  html.phone #app .net-check small {
+    display: none;
+  }
+}
+/* Meet-up polish: compact start button, picker on its own row, tidy driver rows. */
+html.phone #app .meet-race-head .start-button {
+  min-height: 40px;
+  height: 40px;
+}
+html.phone #app .meet-race .lobby-map {
+  flex: 0 0 auto;
+  display: block;
+  min-height: 0;
+  height: auto;
+}
+html.phone #app .meet-race .map-picker {
+  display: flex;
+  align-items: center;
+}
+html.phone #app .card-head :is(.eyebrow, .text-button) {
+  white-space: nowrap;
+}
+html.phone #app .meet-drivers .lobby-player > div {
+  min-width: 0;
+}
+html.phone #app .meet-drivers .lobby-player b {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html.phone #app .meet-drivers .lobby-player .ready {
+  font-size: 12px;
+  padding: 2px 6px;
+  flex: 0 0 auto;
+}
+@media (max-width: 720px) {
+  html.phone #app .room-big span {
+    height: 32px;
+    font-size: 20px;
+  }
+  html.phone #app .room-card .row-buttons .button {
+    min-height: 36px;
+  }
+  html.phone #app .garage-page,
+  html.phone #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) {
+    grid-template-columns: 124px minmax(0, 1fr) minmax(200px, 34vw);
+  }
+}
+/* Manual invite codes are a fallback: on phones they appear only when the room server fails. */
+html.phone #app .room-card .manual-invite:not([open]) {
+  display: none;
+}
+html.phone #app .meet-drivers .lobby-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+html.phone #app .meet-drivers .lobby-player > :is(.slot, .car-swatch) {
+  flex: 0 0 auto;
+}
+html.phone #app .meet-drivers .lobby-player > div {
+  flex: 1 1 auto;
+}
+html.phone #app .meet-drivers .you-tag {
+  display: none;
 }

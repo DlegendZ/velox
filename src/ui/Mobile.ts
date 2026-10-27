@@ -41,6 +41,14 @@ export function installMobile() {
     "beforeend",
     `<div class="rotate-prompt" role="alert"><div class="rotate-phone" aria-hidden="true"><i></i></div><b>TURN YOUR PHONE</b><span>VELOX is played in landscape.</span></div>`,
   );
+  // Long-pressing a pedal or the 3D view must not open the browser's context menu
+  // (back/forward/download image) or start a text selection.
+  const typing = (t: EventTarget | null) =>
+    t instanceof HTMLElement && !!t.closest("input, textarea, select");
+  for (const type of ["contextmenu", "selectstart", "dragstart"])
+    document.addEventListener(type, (e) => {
+      if (coarse() && !typing(e.target)) e.preventDefault();
+    });
   if (!isPhone()) return;
   // Browsers only allow fullscreen from a tap, so ask on the first one.
   const first = () => {
