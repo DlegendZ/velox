@@ -27,6 +27,10 @@ class ParticlePool {
   private life: Float32Array;
   private maxLife: Float32Array;
   private grow: Float32Array;
+  /** Height band per particle: smoke never climbs through a tunnel roof and
+   * sparks bounce on the road they came from, not on world y = 0. */
+  private floor: Float32Array;
+  private ceiling: Float32Array;
   private next = 0;
   private material: THREE.ShaderMaterial;
   constructor(
@@ -43,6 +47,8 @@ class ParticlePool {
     this.life = new Float32Array(capacity);
     this.maxLife = new Float32Array(capacity);
     this.grow = new Float32Array(capacity);
+    this.floor = new Float32Array(capacity);
+    this.ceiling = new Float32Array(capacity);
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.BufferAttribute(this.position, 3));
     geo.setAttribute("color", new THREE.BufferAttribute(this.color, 3));
@@ -119,6 +125,8 @@ class ParticlePool {
     this.size[i] = size;
     this.life[i] = this.maxLife[i] = life;
     this.grow[i] = grow;
+    this.floor[i] = p.y - 0.6;
+    this.ceiling[i] = p.y + 3.2;
   }
   update(dt: number) {
     const damp = Math.exp(-this.drag * dt);
@@ -137,9 +145,13 @@ class ParticlePool {
       this.position[k] += this.velocity[k] * dt;
       this.position[k + 1] += this.velocity[k + 1] * dt;
       this.position[k + 2] += this.velocity[k + 2] * dt;
-      if (this.gravity && this.position[k + 1] < 0.05) {
-        this.position[k + 1] = 0.05;
+      if (this.gravity && this.position[k + 1] < this.floor[i]) {
+        this.position[k + 1] = this.floor[i];
         this.velocity[k + 1] *= -0.3;
+      }
+      if (this.position[k + 1] > this.ceiling[i]) {
+        this.position[k + 1] = this.ceiling[i];
+        this.velocity[k + 1] = Math.min(0, this.velocity[k + 1]);
       }
       const t = this.life[i] / this.maxLife[i];
       this.alpha[i] = Math.min(1, t * 2.5) * (t < 1 ? 1 : 0);

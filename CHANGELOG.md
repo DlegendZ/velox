@@ -1,5 +1,13 @@
 # VELOX changelog
 
+## 0.8.0 — Five big flat circuits
+
+- Five circuits instead of twelve, each about 4 km: Metropolis Grand Prix, Cliffside Coast Grand Prix, Red Mesa Grand Prix, and two new drift circuits, Harbour Drift and Lighthouse Touge. Roads are completely flat (no elevation, banking or crests), so cars no longer get airborne, slide on slopes, or crawl uphill.
+- Boost-pad arrows point straight down the lane and sit flush on the asphalt; lamp light pools and underglow sit on the road surface, and lamp heads hang from an arm on their post. Smoke and sparks stay within a few metres of where they appear, so nothing pokes through tunnel roofs.
+- Reverse drives at up to about 45 km/h.
+- Pause shows the frozen race behind a blurred panel with lap, time and position, large menu entries, the circuit map and the live order. Results have a medal-coloured position badge, compact standings, and MAIN MENU / NEXT RACE actions (NEXT RACE goes back to circuit selection).
+- Title screen centres the car with the prompt lower down; the Settings menu camera stays under the studio ceiling; the main-menu shade is lighter; online invite boxes match the room-code input.
+
 ## 0.7.0 — Setup flow, scrolling and loading
 
 - Quick race setup is two pages: choose the circuit (mode tabs, three-card carousel, NEXT), then set the conditions (circuit summary beside laps, rivals, difficulty, direction and weather, START). Both pages fit 1280×720 and larger without scrolling. Clicking a side card selects it; clicking the centre card continues. One wheel or trackpad gesture moves one circuit.

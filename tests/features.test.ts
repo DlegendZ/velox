@@ -209,7 +209,8 @@ test("AI keeps following neon_a after the screen-space steering conversion", asy
     const checkpoints = new Checkpoints();
     const forward = new Vector3();
     let hint = -1;
-    for (let step = 0; step < 20 * 60; step++) {
+    // 0.8 circuits are ~4 km, so checkpoints sit ~350 m apart.
+    for (let step = 0; step < 40 * 60; step++) {
       const near = track.nearest(car.position, hint);
       hint = near.index;
       car.update(
@@ -229,7 +230,7 @@ test("AI keeps following neon_a after the screen-space steering conversion", asy
     }
     assert.ok(
       checkpoints.passed >= 3,
-      `AI passed ${checkpoints.passed} checkpoints in 20 seconds`,
+      `AI passed ${checkpoints.passed} checkpoints in 40 seconds`,
     );
     car.dispose();
   } finally {

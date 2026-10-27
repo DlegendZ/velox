@@ -888,11 +888,12 @@ export class CarFactory {
     const underglow = add(
       root,
       "Light_Underglow_Socket",
-      new THREE.PlaneGeometry(d.width * 2 + 0.6, spec.length + 0.8),
-      new THREE.MeshBasicMaterial({ color: 0xafffd4, transparent: true, opacity: 0.14, blending: THREE.AdditiveBlending, depthWrite: false }),
+      new THREE.PlaneGeometry(d.width * 2 + 2.2, spec.length + 2.2),
+      new THREE.MeshBasicMaterial({ color: 0xafffd4, map: underglowMap(), transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }),
     );
     underglow.rotation.x = -Math.PI / 2;
-    underglow.position.y = 0.025;
+    // Just above the contact patch so it lights the asphalt instead of sinking into it.
+    underglow.position.y = 0.06;
     for (const side of [-1, 1]) {
       const beam = add(root, "Light_Beam", new THREE.PlaneGeometry(2.2, 12), M.beam);
       beam.rotation.x = -Math.PI / 2;
@@ -956,6 +957,22 @@ export class CarFactory {
     model.apply(visual);
     return model;
   }
+}
+let underglowTexture: THREE.CanvasTexture | null = null;
+/** Soft rounded pool of light: bright under the floor, fading past the body. */
+function underglowMap() {
+  if (underglowTexture || typeof document === "undefined")
+    return underglowTexture;
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const ctx = c.getContext("2d")!;
+  const g = ctx.createRadialGradient(64, 64, 8, 64, 64, 64);
+  g.addColorStop(0, "rgba(255,255,255,0.9)");
+  g.addColorStop(0.45, "rgba(255,255,255,0.55)");
+  g.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  return (underglowTexture = new THREE.CanvasTexture(c));
 }
 export function disposeObject(root: THREE.Object3D) {
   const geometries = new Set<THREE.BufferGeometry>(),

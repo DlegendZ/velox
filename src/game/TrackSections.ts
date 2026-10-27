@@ -212,32 +212,36 @@ export function buildSections(track: Track) {
       const t = track.reverse ? 1 - s.at : s.at,
         at = track.at(t);
       if (s.type === "boost") {
+        // Patch UVs run u across the lane and v along the direction of travel,
+        // so the chevrons are drawn pointing up the texture (straight ahead).
         const canvas = document.createElement("canvas");
-        canvas.width = 256;
-        canvas.height = 128;
+        canvas.width = 128;
+        canvas.height = 256;
         const ctx = canvas.getContext("2d")!;
         ctx.fillStyle = "#c6ff3d";
         for (let i = 0; i < 3; i++) {
+          const y = 20 + i * 76;
           ctx.beginPath();
-          ctx.moveTo(30 + i * 75, 120);
-          ctx.lineTo(65 + i * 75, 65);
-          ctx.lineTo(30 + i * 75, 10);
-          ctx.lineTo(55 + i * 75, 10);
-          ctx.lineTo(90 + i * 75, 65);
-          ctx.lineTo(55 + i * 75, 120);
+          ctx.moveTo(10, y + 56);
+          ctx.lineTo(64, y);
+          ctx.lineTo(118, y + 56);
+          ctx.lineTo(118, y + 80);
+          ctx.lineTo(64, y + 24);
+          ctx.lineTo(10, y + 80);
           ctx.closePath();
           ctx.fill();
         }
         const map = new THREE.CanvasTexture(canvas);
+        map.anisotropy = 8;
         const plane = new THREE.Mesh(
           track.roadPatch(
-            t - 1.6 / track.length,
-            t + 1.6 / track.length,
-            -track.halfWidthAt(t) * 0.55,
-            track.halfWidthAt(t) * 0.55,
-            4,
+            t - 3 / track.length,
+            t + 3 / track.length,
+            -Math.min(3.2, track.halfWidthAt(t) * 0.45),
+            Math.min(3.2, track.halfWidthAt(t) * 0.45),
             6,
-            0.025,
+            4,
+            0.04,
           ),
           new THREE.MeshStandardMaterial({
             map,
@@ -246,8 +250,11 @@ export function buildSections(track: Track) {
             emissive: 0x8fff36,
             emissiveIntensity: 0.6,
             transparent: true,
-            opacity: 0.35,
-            side: THREE.DoubleSide,
+            opacity: 0.7,
+            depthWrite: false,
+            polygonOffset: true,
+            polygonOffsetFactor: -4,
+            polygonOffsetUnits: -4,
           }),
         );
         plane.name = "BoostPad";

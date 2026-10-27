@@ -1211,3 +1211,359 @@ body.input-keys #app .mode-tab:focus:not(.selected) {
   text-overflow: clip;
   white-space: nowrap;
 }
+
+/* ===================================================== 0.8 pause screen */
+#app.state-pause::before {
+  background: none !important;
+  backdrop-filter: none !important;
+}
+#app .pause-backdrop {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(6, 8, 11, 0.94) 0%,
+      rgba(6, 8, 11, 0.82) 42%,
+      rgba(6, 8, 11, 0.5) 100%
+    );
+  backdrop-filter: blur(10px) saturate(1.1);
+  padding: clamp(16px, 4vh, 48px) clamp(16px, 5vw, 80px);
+  place-items: center stretch;
+}
+#app .pause-layout {
+  display: grid;
+  grid-template-columns: minmax(340px, 520px) minmax(0, 1fr);
+  gap: clamp(24px, 5vw, 96px);
+  align-items: center;
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  animation: pause-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes pause-in {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+}
+#app .pause-panel {
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  max-height: none;
+  overflow: visible;
+}
+#app .pause-panel h1 {
+  font: 800 italic clamp(56px, 9vh, 96px) / 0.95 var(--font-display);
+  margin: 6px 0 clamp(12px, 2.4vh, 22px);
+  background: linear-gradient(100deg, #fff 30%, #c6ff3d 75%, #3cf2d0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+#app .pause-chips {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: clamp(14px, 3vh, 28px);
+}
+#app .pause-chips span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 2px solid var(--accent);
+}
+#app .pause-chips small {
+  font: 700 12px/1 var(--font-label);
+  letter-spacing: 0.12em;
+  color: var(--text-3);
+}
+#app .pause-chips b {
+  font: 700 22px/1.1 var(--font-num);
+  color: var(--text-1);
+}
+#app .pause-chips i {
+  font-style: normal;
+  font-size: 15px;
+  color: var(--text-3);
+}
+#app .pause-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: visible;
+}
+#app .pause-entry {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: clamp(52px, 8vh, 68px);
+  padding: 8px 18px;
+  text-align: left;
+  color: var(--text-2);
+  background: rgba(255, 255, 255, 0.03);
+  border: 0;
+  border-left: 3px solid transparent;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    transform 0.15s,
+    color 0.15s;
+}
+#app .pause-entry:is(:hover, :focus) {
+  outline: none;
+  color: var(--text-1);
+  background: linear-gradient(90deg, rgba(198, 255, 61, 0.14), rgba(198, 255, 61, 0.02) 80%);
+  border-left-color: var(--accent);
+  transform: translateX(6px);
+}
+#app .pause-entry.primary {
+  color: var(--accent-ink);
+  background: var(--accent-grad);
+  border-left-color: transparent;
+}
+#app .pause-entry.primary:is(:hover, :focus) {
+  color: var(--accent-ink);
+  background: var(--accent-grad);
+  box-shadow: 0 10px 30px rgba(198, 255, 61, 0.25);
+}
+#app .pause-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+}
+#app .pause-entry.primary .pause-icon {
+  background: rgba(11, 18, 0, 0.12);
+}
+#app .pause-icon svg {
+  width: 20px;
+  height: 20px;
+}
+#app .pause-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+#app .pause-text b {
+  font: 800 italic clamp(20px, 3vh, 26px) / 1 var(--font-display);
+  letter-spacing: 0.02em;
+}
+#app .pause-text small {
+  font: 500 13px/1.3 var(--font-body);
+  opacity: 0.75;
+}
+#app .pause-entry kbd {
+  margin-left: auto;
+}
+#app .pause-side {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  gap: var(--space-5);
+  align-items: start;
+}
+#app .pause-map {
+  padding: clamp(14px, 2.4vh, 24px);
+  background: rgba(13, 17, 24, 0.72);
+  border-top: 2px solid var(--accent);
+}
+#app .pause-map h2 {
+  margin: 4px 0 0;
+  font-size: clamp(20px, 3vh, 28px);
+}
+#app .pause-map svg {
+  width: 100%;
+  height: clamp(160px, 34vh, 340px);
+}
+#app .pause-status {
+  display: block;
+}
+#app .pause-status .result-card {
+  padding: clamp(12px, 2vh, 20px) 16px;
+  background: rgba(13, 17, 24, 0.72);
+  border-top: 2px solid var(--line-strong);
+  max-height: calc(100dvh - 2 * clamp(16px, 4vh, 48px));
+  overflow: auto;
+}
+/* Compact standings rows (pause and results). */
+#app .standing-row {
+  min-height: 40px;
+  padding: 6px 4px;
+  gap: 10px;
+}
+#app .standing-row .who {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+#app .standing-row .who small {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#app .standing-row.me {
+  background: linear-gradient(90deg, rgba(198, 255, 61, 0.14), transparent);
+}
+@media (max-width: 1100px) {
+  #app .pause-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #app .pause-side {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #app .pause-map {
+    display: none;
+  }
+}
+
+/* =================================================== 0.8 results screen */
+#app .results-page {
+  --medal: var(--accent);
+  position: relative;
+}
+#app .results-page.place-1 {
+  --medal: #ffc94a;
+}
+#app .results-page.place-2 {
+  --medal: #d6e2ee;
+}
+#app .results-page.place-3 {
+  --medal: #e09a5f;
+}
+#app .results-page::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 260px;
+  background: radial-gradient(ellipse 60% 100% at 85% 0%, color-mix(in srgb, var(--medal) 22%, transparent), transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+#app .result-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "title pos" "sub pos";
+  align-items: end;
+  column-gap: var(--space-5);
+}
+#app .result-heading h1 {
+  grid-area: title;
+  font-size: clamp(44px, 8vh, 84px);
+  line-height: 1.15;
+}
+#app .result-sub {
+  grid-area: sub;
+  margin: 6px 0 0;
+  font: 700 13px/1.2 var(--font-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+#app .result-position {
+  grid-area: pos;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 22px 12px;
+  color: var(--medal);
+  font: 800 italic clamp(56px, 11vh, 110px) / 0.9 var(--font-num);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--medal) 16%, transparent), transparent 80%) !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  -webkit-text-fill-color: var(--medal);
+  border-right: 4px solid var(--medal);
+  text-shadow: 0 6px 30px color-mix(in srgb, var(--medal) 40%, transparent);
+}
+#app .result-position small {
+  -webkit-text-fill-color: var(--text-2);
+  font: 700 14px/1 var(--font-label);
+  letter-spacing: 0.1em;
+  color: var(--text-2);
+  text-shadow: none;
+}
+#app .result-card {
+  border-top: 2px solid var(--line-strong);
+}
+#app .result-card:first-child {
+  border-top-color: var(--medal);
+}
+#app .result-card .result-total {
+  font: 800 clamp(40px, 6vh, 60px) / 1 var(--font-num);
+  color: var(--text-1);
+}
+#app .result-actions {
+  gap: var(--space-2);
+}
+
+/* Online: invite boxes look exactly like the room-letter input. Text fields
+   never get the scroll-edge fade (it read as an inner shadow). */
+#app :is(textarea, input)[data-scroll-key] {
+  mask-image: none !important;
+}
+#app textarea {
+  font: 400 14px/1.45 var(--font-body);
+  resize: none;
+  background: var(--glass-strong);
+  border: 1px solid var(--line-strong);
+  box-shadow: none;
+  min-height: 52px;
+  height: 52px;
+  padding: 14px 12px;
+}
+#app .lobby-entry input[type="text"] {
+  min-height: 52px;
+  height: 52px;
+  box-shadow: none;
+}
+#app textarea[readonly] {
+  height: auto;
+  min-height: 72px;
+}
+
+/* ============================== main menu: lighter scrim, car stays clear */
+#app.state-menu::before {
+  background: linear-gradient(
+    90deg,
+    rgba(7, 9, 13, 0.88) 0%,
+    rgba(7, 9, 13, 0.6) 26%,
+    rgba(7, 9, 13, 0) 44%
+  ) !important;
+}
+#app :is(.your-ride, .daily-ticket) {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(6px) !important;
+}
+
+/* ==================================== title: car centred, prompt lower */
+#app .title-screen [data-action="enter"] {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(48px, 12vh, 130px);
+  transform: translateX(-50%);
+  margin: 0;
+}
+#app .result-heading h1 .title-period {
+  display: inline-block;
+  height: 1em;
+  line-height: 1;
+}
+#app .result-heading {
+  max-height: none;
+  height: auto;
+  padding-bottom: 8px;
+}
+#app .result-position {
+  align-items: flex-end !important;
+}
+#app .result-heading h1 {
+  font-size: clamp(40px, 7vh, 76px);
+}

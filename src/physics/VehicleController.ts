@@ -254,7 +254,10 @@ export class VehicleController {
       this.controller.setWheelEngineForce(
         i,
         driven
-          ? (input.throttle * force - (reverse ? force * 0.45 : 0)) / count
+          ? (input.throttle * force -
+              // Reverse pulls hard up to ~45 km/h instead of crawling.
+              (reverse && long > -12.5 ? force * 0.75 * input.brake : 0)) /
+            count
           : 0,
       );
       const absFactor =

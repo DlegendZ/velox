@@ -364,7 +364,9 @@ export class Game {
         240,
       );
     if (MENU_STATES.includes(state)) {
-      this.renderer.setStage(state === "garage");
+      this.renderer.setStage(
+        state === "garage" ? true : state === "title" ? "title" : false,
+      );
       if (state !== "garage")
         this.renderer.showCar(
           carById(this.save.data.garage.activeCar),
@@ -718,6 +720,12 @@ export class Game {
       this.config.mode = a.slice(5) as RaceMode;
       this.config.eventId = undefined;
       this.rememberRace();
+      this.machine.go("tracks");
+      return;
+    }
+    if (a === "setup-again") {
+      // After a race, pick the next circuit with the same mode and conditions.
+      this.config.eventId = undefined;
       this.machine.go("tracks");
       return;
     }

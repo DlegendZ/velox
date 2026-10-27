@@ -25,7 +25,7 @@ export class TrackGeometry {
     const control = spec.points.map((p) => [
       p[0],
       p[1],
-      p[2] ?? 0,
+      0,
       p[3] ?? spec.width,
     ]);
     if (reverse) control.reverse();
@@ -72,15 +72,10 @@ export class TrackGeometry {
       let bank = 0;
       for (let j = -smooth; j <= smooth; j++)
         bank += this.curvature[(i + j + this.samples) % this.samples];
-      this.banks.push(
-        this.inSection("tunnel", i / this.samples)
-          ? 0
-          : THREE.MathUtils.clamp(
-              (bank / (smooth * 2 + 1)) * 40,
-              -Math.PI / 30,
-              Math.PI / 30,
-            ),
-      );
+      // Roads are flat: cars stay level, so a banked surface only made the
+      // body look detached from the asphalt and unsettled the tyres.
+      void bank;
+      this.banks.push(0);
     }
     if (spec.environment === "coast") {
       const lowest = Math.min(
@@ -88,7 +83,8 @@ export class TrackGeometry {
           (p, i) => p.y - this.widths[i] * Math.abs(Math.sin(this.banks[i])),
         ),
       );
-      const raise = Math.max(0, 1.35 - lowest);
+      // The flat coast road runs on a 4 m seawall so its verges stay clear of the surf.
+      const raise = Math.max(0, 4 - lowest);
       this.points.forEach((p) => (p.y += raise));
       this.curve.points.forEach((p) => (p.y += raise));
     }

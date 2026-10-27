@@ -450,7 +450,9 @@ export class Renderer {
       online: [5.2, 3, 8.8],
       garage: [5.6, 1.7, 6.4],
       driver: [3, 1.4, 4.6],
-      settings: [0.1, 11, 4],
+      // Under the 7.6 m ceiling and its softboxes, so the car stays in view.
+      settings: [2, 5, 6.5],
+      title: [5.6, 1.5, 7],
       engine: [8, 0.55, 0],
       paint: [-5.6, 1.7, -6.4],
       wheel: [2.8, 0.9, 2.7],
@@ -460,7 +462,8 @@ export class Renderer {
     this.stageFrom.copy(this.camera.position);
     this.stageTarget.set(...(pos as [number, number, number]));
     this.stageLookFrom.copy(this.stageLook);
-    this.stageLookTarget.set(garage ? 0 : -1.7, 0.7, 0);
+    // The title centres the car; menu poses leave room for the left-hand list.
+    this.stageLookTarget.set(garage || preset === "title" ? 0 : -1.7, 0.7, 0);
     if (preset === "wheel") this.stageLookTarget.set(0.98, 0.45, 1.3);
     this.stageTween = 0;
     this.mode = "stage";
@@ -791,7 +794,9 @@ export class Renderer {
     this.renderer.info.reset();
     const stageVisible = this.stage.visible,
       worldVisible = this.world.visible;
-    if (this.contentScreen) {
+    // Pause keeps the frozen race behind its blurred panel; other content
+    // screens draw over a cleared canvas.
+    if (this.contentScreen && this.contentScreen !== "pause") {
       this.stage.visible = false;
       this.world.visible = false;
     }

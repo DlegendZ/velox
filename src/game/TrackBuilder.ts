@@ -752,9 +752,10 @@ export class Track extends TrackGeometry {
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
-      opacity: night ? 0.55 : 0.12,
+      opacity: night ? 0.8 : 0.14,
       polygonOffset: true,
-      polygonOffsetFactor: -2,
+      polygonOffsetFactor: -4,
+      polygonOffsetUnits: -4,
       vertexColors: true,
     });
     for (let i = 0; i < 64; i++) {
@@ -768,9 +769,21 @@ export class Track extends TrackGeometry {
       dummy.scale.set(1, 1, 1);
       dummy.updateMatrix();
       posts.setMatrixAt(i, dummy.matrix);
-      dummy.position.set(head.point.x, at.point.y + 7, head.point.z);
+      // The luminaire is an arm from the post top out over the kerb, so it
+      // never floats beside the pole.
+      dummy.position.set(
+        (at.point.x + head.point.x) / 2,
+        at.point.y + 7,
+        (at.point.z + head.point.z) / 2,
+      );
       dummy.rotation.set(0, at.yaw + Math.PI / 2, 0);
-      dummy.scale.set(1.4, 1, 1);
+      dummy.scale.set(
+        (Math.hypot(head.point.x - at.point.x, head.point.z - at.point.z) +
+          0.5) /
+          1.5,
+        1,
+        1,
+      );
       dummy.updateMatrix();
       lamps.setMatrixAt(i, dummy.matrix);
       const half = Math.min(
@@ -788,7 +801,7 @@ export class Track extends TrackGeometry {
         hi,
         6,
         6,
-        0.025,
+        0.045,
       );
       const uv = patch.getAttribute("uv"),
         color = new THREE.Color(

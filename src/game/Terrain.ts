@@ -120,7 +120,7 @@ export class Terrain {
       edge = Math.sqrt(best) - g.halfWidthAt(t),
       road = g.points[index];
     const coastFloor = (height: number) =>
-      env === "coast" && edge <= 25 ? Math.max(0.4, height) : height;
+      env === "coast" && edge <= 30 ? Math.max(0.4, height) : height;
     if (g.inSection("tunnel", t) && edge < 34) {
       // The 9.4m heightfield cells need a broad cutting around the separate tunnel shell.
       const surface = road.y - 0.65;

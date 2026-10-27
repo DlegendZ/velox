@@ -50,8 +50,13 @@ test("all tracks satisfy minimum radius, separation, elevation and grade", () =>
     assert.equal(g.samples, Math.ceil(g.length / 1.5));
     if (spec.length === "gp") {
       assert.ok(g.length >= 2800);
-      assert.ok(spec.sections?.some((s) => s.type === "bridge"));
-      assert.ok(spec.sections?.some((s) => s.type === "tunnel"));
+      // Every large circuit has at least one landmark structure.
+      assert.ok(
+        spec.sections?.some((s) => s.type === "bridge" || s.type === "tunnel"),
+      );
+      // 0.8: circuits are flat with no banking.
+      assert.ok(g.banks.every((b) => b === 0));
+      assert.ok(maxGrade < 1e-6, `${spec.id}: grade ${maxGrade}`);
     }
   }
 });
