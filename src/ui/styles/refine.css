@@ -162,7 +162,7 @@ body.drag-scrolling * {
   margin-top: 0;
 }
 /* Mode and settings tabs show focus through their fill, not a ring. */
-body.input-keys #app :is(.mode-tab, .settings-tabs button, .home-entry):focus {
+body.input-keys #app :is(.mode-tab, .settings-tabs button, .home-entry, .pause-entry):focus {
   outline: none;
 }
 body.input-keys #app .mode-tab:focus:not(.selected) {
