@@ -2,7 +2,7 @@
 // stay usable, and portrait asks to rotate. Saves screenshots for review.
 import { chromium } from "playwright";
 const url = process.env.VELOX_URL ?? "http://127.0.0.1:5174";
-const sizes = (process.argv[2] ?? "844x390,740x360,667x375").split(",");
+const sizes = (process.argv[2] ?? "844x390,740x360,667x375,844x330,780x320").split(",");
 const states = (process.argv[3] ?? "title,menu,tracks,tracks:conditions,career,garage,garage:performance,garage:visual,profile,settings,lobby,lobby:host,race,pause,results").split(",");
 const browser = await chromium.launch({ headless: true, channel: "chrome" });
 const fails = [];

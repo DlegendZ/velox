@@ -1,5 +1,13 @@
 # VELOX changelog
 
+## 0.10.2 — Phone screens with the browser bar showing
+
+- Phone layouts now also fit landscape screens only 320–340 px tall (an address bar showing), sizing from the viewport height.
+- Pause: one even dark blur over the whole screen, a compact panel (title and lap/time/position on one row, RESUME across, four actions in two columns) beside the live order, with no scrolling.
+- Results on phones: the heading, position and actions sit on the left; THE RUN, FINAL ORDER and THE PAYOFF are tabs on the right, so the open card gets the full height in clear type.
+- Main menu: the six entries share the height evenly in one column, with no vertical or sideways scrolling.
+- Race HUD on short screens: smaller pedals and arrows, and the speedometer moves beside the pedals.
+
 ## 0.10.1 — Phone controls and roomier phone screens
 
 - Touch driving: steering uses ◀ ▶ buttons by default (the drag pad is an option under Controls). A thumb can roll from GAS onto N2O, DRIFT or BRAKE without lifting, and N2O and DRIFT keep the throttle on, so one thumb boosts or drifts at full gas while the other steers. Presses give a short vibration where supported.

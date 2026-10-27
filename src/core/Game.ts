@@ -393,6 +393,7 @@ export class Game {
         void this.netAction("net-join");
       });
     }
+    if (state === "results" && previous !== "replay") this.resultTab = null;
     if (MENU_STATES.includes(state)) {
       this.skipIntro = false;
       this.renderer.setStage(
@@ -647,6 +648,8 @@ export class Game {
     };
     requestAnimationFrame(step);
   }
+  /** Results card shown on phones (null: the default for this result). */
+  resultTab: "run" | "order" | "payoff" | null = null;
   /** Car picked in the garage while an open-garage online room is active. */
   onlineCar: string | null = null;
   /** The host lends every car fully upgraded to everyone in this room. */
@@ -929,6 +932,11 @@ export class Game {
       if (fromCard) selected?.focus({ preventScroll: true });
       if (selected) revealControl(selected);
       this.updateGarageArrows();
+      return;
+    }
+    if (a.startsWith("result-tab-")) {
+      this.resultTab = a.slice(11) as Game["resultTab"];
+      this.screen();
       return;
     }
     if (a.startsWith("online-car-")) {
