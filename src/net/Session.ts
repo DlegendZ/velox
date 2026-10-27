@@ -81,17 +81,36 @@ const brokerError = (e: unknown) => {
     return "This browser cannot play online. Try Chrome, Edge or Firefox.";
   return "Cannot reach the room server. Check your internet connection.";
 };
-async function openBroker(id?: string) {
-  const { default: Peer } = await import("peerjs");
-  const config = { iceServers: await iceServers() };
+/**
+ * Same-origin relay (api/peerjs.ts) for networks that cannot reach the public broker,
+ * e.g. ISP DNS blocks. VITE_BROKER_RELAY overrides it for local testing.
+ */
+const RELAY_PATH: string = import.meta.env?.VITE_BROKER_RELAY ?? "/api/peerjs/";
+/** Once the relay was needed, later rooms skip the direct attempt (?relay=1 forces it). */
+let useRelay =
+  typeof location !== "undefined" &&
+  new URLSearchParams(location.search).get("relay") === "1";
+function relayOptions() {
+  if (typeof location === "undefined") return null;
+  const url = new URL(RELAY_PATH, location.href),
+    secure = url.protocol === "https:";
+  return {
+    host: url.hostname,
+    port: Number(url.port) || (secure ? 443 : 80),
+    secure,
+    path: url.pathname,
+  };
+}
+type PeerClass = typeof import("peerjs").default;
+function tryBroker(Peer: PeerClass, id: string | undefined, options: object, wait: number) {
   return new Promise<Broker>((resolve, reject) => {
     const peer = (
-      id ? new Peer(id, { config, debug: 0 }) : new Peer({ config, debug: 0 })
+      id ? new Peer(id, { ...options, debug: 0 }) : new Peer({ ...options, debug: 0 })
     ) as unknown as Broker;
     const timer = setTimeout(() => {
       peer.destroy();
       reject({ type: "network" });
-    }, 12000);
+    }, wait);
     peer.once("open", () => {
       clearTimeout(timer);
       resolve(peer);
@@ -102,6 +121,22 @@ async function openBroker(id?: string) {
       reject(e);
     });
   });
+}
+async function openBroker(id?: string) {
+  const { default: Peer } = await import("peerjs");
+  const config = { iceServers: await iceServers() },
+    relay = relayOptions();
+  if (!useRelay || !relay)
+    try {
+      return await tryBroker(Peer, id, { config }, relay ? 6000 : 12000);
+    } catch (e) {
+      const type = (e as { type?: string })?.type ?? "";
+      if (!relay || ["unavailable-id", "invalid-id", "browser-incompatible"].includes(type))
+        throw e;
+    }
+  const peer = await tryBroker(Peer, id, { config, ...relay }, 12000);
+  useRelay = true;
+  return peer;
 }
 export const randomId = () =>
   Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) =>
@@ -291,7 +326,10 @@ export class NetSession {
       return;
     }
     this.broker = peer;
-    peer.on("error", (e) => this.close(brokerError(e)));
+    // Once linked, the broker is no longer needed; its socket may drop (relay time limit).
+    peer.on("error", (e) => {
+      if (!this.connected) this.close(brokerError(e));
+    });
     const conn = peer.connect(ROOM_PREFIX + code, {
       reliable: true,
       serialization: "raw",
