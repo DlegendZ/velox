@@ -30,7 +30,7 @@ export function buildSections(track: Track) {
   const stripMat = new THREE.MeshStandardMaterial({
     color: 0xfff1d6,
     emissive: 0xffd9a0,
-    emissiveIntensity: 1.35,
+    emissiveIntensity: 1.1,
     side: THREE.DoubleSide,
   });
   const strips: THREE.BufferGeometry[] = [];
@@ -74,11 +74,12 @@ export function buildSections(track: Track) {
         g.computeVertexNormals();
         shells.push(g);
       }
-      // Continuous light strips along both upper walls.
+      // Continuous light strips either side of the crown. At ~3.5 m (the chase
+      // camera's eye height) they projected onto the horizon as one bright band.
       const next = track.at((i + 1) / track.samples);
       for (const [a, b] of [
-        [0.2, 0.235],
-        [0.765, 0.8],
+        [0.395, 0.41],
+        [0.59, 0.605],
       ].map(([x, y]) => [x * Math.PI, y * Math.PI])) {
         const r = radius - 0.06;
         const quad = [

@@ -1012,13 +1012,14 @@ body.input-keys #app .mode-tab:focus:not(.selected) {
   #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) {
     grid-template-columns: 200px minmax(0, 1fr) minmax(360px, 440px);
     grid-template-rows: auto minmax(0, 1fr);
-    grid-template-areas: "head head head" "rail stage info";
+    /* The settings panel runs from beside the heading down to the footer. */
+    grid-template-areas: "head head info" "rail stage info";
   }
   #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) .garage-strip {
     display: none;
   }
   #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) .garage-info {
-    grid-row: 2;
+    grid-area: info;
     align-self: stretch;
     height: 100%;
     max-height: 100%;
@@ -1566,4 +1567,14 @@ body.input-keys #app .mode-tab:focus:not(.selected) {
 }
 #app .result-heading h1 {
   font-size: clamp(40px, 7vh, 76px);
+}
+
+/* Garage: panels cast a short shadow and a light blur so the car beside them
+   stays clear (same treatment as the main menu cards). */
+#app .garage-page :is(.garage-info, .garage-car-info, .car-row, .garage-tabs button, .garage-arrow, .orbit-hint) {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(6px) !important;
+}
+#app .garage-page .garage-tabs button:not(.active) {
+  background: rgba(7, 9, 13, 0.6);
 }

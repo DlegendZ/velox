@@ -1,5 +1,11 @@
 # VELOX changelog
 
+## 0.8.1 — Tunnel and garage polish
+
+- Tunnels: no street lamps or road light pools inside or at the portals, and the ceiling light strips sit beside the crown instead of at camera height (where they read as a bright band across the screen).
+- Restart (from pause or RACE AGAIN) skips the intro fly-around: the camera starts behind your car on the grid.
+- Garage: panels cast a short, light shadow so the car stays clear; Performance and Customize panels run from beside the heading down to the footer.
+
 ## 0.8.0 — Five big flat circuits
 
 - Five circuits instead of twelve, each about 4 km: Metropolis Grand Prix, Cliffside Coast Grand Prix, Red Mesa Grand Prix, and two new drift circuits, Harbour Drift and Lighthouse Touge. Roads are completely flat (no elevation, banking or crests), so cars no longer get airborne, slide on slopes, or crawl uphill.

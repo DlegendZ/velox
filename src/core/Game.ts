@@ -136,6 +136,7 @@ export class Game {
   private backTransition = false;
   private restoringScreen = false;
   private hoverFocus = false;
+  private skipIntro = false;
   private orbitHintTimer = 0;
   private orbitHintDismissed = false;
   constructor(
@@ -364,6 +365,7 @@ export class Game {
         240,
       );
     if (MENU_STATES.includes(state)) {
+      this.skipIntro = false;
       this.renderer.setStage(
         state === "garage" ? true : state === "title" ? "title" : false,
       );
@@ -759,6 +761,8 @@ export class Game {
     if (a === "start" || a === "restart") {
       if (this.net) return;
       if (a === "start") this.rememberRace();
+      // A restart goes straight to the chase camera behind the car on the grid.
+      this.skipIntro = a === "restart";
       this.machine.go("prerace");
       return;
     }
@@ -1639,7 +1643,7 @@ export class Game {
           ? r.track.at(roadT).point.y - 0.1
           : r.track.terrain.heightAt(r.player.position.x, r.player.position.z);
         this.camera.roadSlope = r.track.at(roadT).tangent.y;
-        if (r.countdown > 0 || r.waiting)
+        if ((r.countdown > 0 || r.waiting) && !this.skipIntro)
           this.camera.cinematic(
             dt,
             r.player.position,

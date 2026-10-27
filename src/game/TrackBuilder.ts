@@ -763,6 +763,17 @@ export class Track extends TrackGeometry {
         t = i / 64,
         at = this.at(t, side * (this.halfWidthAt(t) + 2.2)),
         head = this.at(t, side * (this.halfWidthAt(t) + 0.4));
+      // Tunnels have their own ceiling strips: no street lamps (or their light
+      // pools) inside them or at the portals, where posts would pierce the roof.
+      if (
+        [-14, 0, 14].some((d) => this.inSection("tunnel", t + d / this.length))
+      ) {
+        dummy.scale.set(0, 0, 0);
+        dummy.updateMatrix();
+        posts.setMatrixAt(i, dummy.matrix);
+        lamps.setMatrixAt(i, dummy.matrix);
+        continue;
+      }
       // Posts stand upright on the verge; the luminaire reaches out over the kerb.
       dummy.position.set(at.point.x, at.point.y + 3.5, at.point.z);
       dummy.rotation.set(0, at.yaw, 0);
