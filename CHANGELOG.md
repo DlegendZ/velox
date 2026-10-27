@@ -1,5 +1,11 @@
 # VELOX changelog
 
+## 0.9.2 — Steadier online races
+
+- A room-code player whose connection drops mid-race (a Wi-Fi blip or the router changing ports) reconnects automatically. The guest redials the host through the room server for up to 30 seconds while the host holds their slot and car, so the race carries on. Both sides see a toast: "Reconnecting…", "Holding their spot…", "Reconnected".
+- Messages sent during the gap (a finish, chat) are queued and delivered once the player is back.
+- Leaving on purpose still frees the slot at once, and guests are told straight away when the host closes the room.
+
 ## 0.9.1 — Room server fallback
 
 - Players whose network cannot reach the public room server (an ISP DNS block, for example) now connect through VELOX's own domain: `/api/peerjs` relays the short connection handshake to the PeerJS server. The game tries the direct route for six seconds, then the relay, and remembers the choice. `?relay=1` forces the relay.

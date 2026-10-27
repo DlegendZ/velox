@@ -14,6 +14,8 @@ import {
 } from "./Link";
 export const PROTOCOL = 1;
 export const MAX_PLAYERS = 6;
+/** How long a dropped room-code guest may take to come back before losing their spot. */
+export const REJOIN_MS = 30000;
 export interface LobbyPlayer {
   id: string;
   name: string;
@@ -184,6 +186,10 @@ export class NetSession {
   onFinish = (_id: string, _time: number, _best: number | null) => {};
   onPlayerLeft = (_name: string, _id: string) => {};
   onPlayerJoined = (_name: string) => {};
+  /** Host: a room-code guest dropped and their spot is held (away) or they came back. */
+  onPlayerAway = (_name: string, _away: boolean) => {};
+  /** Guest: lost the host and is redialling (true), or got back in (false). */
+  onReconnecting = (_active: boolean) => {};
   onChat = (_name: string, _text: string) => {};
   onLobby = () => {};
   onRetire = (_id: string) => {};
@@ -264,6 +270,8 @@ export class NetSession {
   }
   /** Short code friends type to join, once the room is registered. */
   roomCode = "";
+  /** Guest: the host accepted us at least once, so a drop is worth redialling. */
+  private connectedOnce = false;
   roomError = "";
   private broker: Broker | null = null;
   /** Host: register a room code on the public PeerJS broker. It only introduces peers. */
@@ -281,15 +289,21 @@ export class NetSession {
         this.roomError = "";
         peer.on("connection", (conn: BrokeredConnection & { metadata?: { id?: unknown } }) => {
           const asked = conn.metadata?.id,
-            id =
-              typeof asked === "string" && /^[0-9a-f]{12}$/.test(asked) && !this.links.has(asked)
-                ? asked
-                : randomId();
-          if (this.players.length + this.pendingCount() >= MAX_PLAYERS) {
+            valid = typeof asked === "string" && /^[0-9a-f]{12}$/.test(asked),
+            // A known player redialling replaces their old link, which may not have
+            // noticed the drop yet.
+            returning = valid && this.players.some((p) => p.id === asked),
+            id = valid && (returning || !this.links.has(asked)) ? asked : randomId();
+          if (
+            !returning &&
+            this.players.length + this.pendingCount() >= MAX_PLAYERS
+          ) {
             conn.close();
             return;
           }
+          const previous = this.links.get(id);
           this.adopt(new PeerLink(conn, id), id);
+          previous?.close();
         });
         // The broker drops idle sockets; reconnect so new friends can still join.
         peer.on("disconnected", () =>
@@ -328,14 +342,10 @@ export class NetSession {
     this.broker = peer;
     // Once linked, the broker is no longer needed; its socket may drop (relay time limit).
     peer.on("error", (e) => {
-      if (!this.connected) this.close(brokerError(e));
+      if (!this.connected && !this.rejoining && this.broker === peer)
+        this.close(brokerError(e));
     });
-    const conn = peer.connect(ROOM_PREFIX + code, {
-      reliable: true,
-      serialization: "raw",
-      metadata: { id: this.selfId },
-    });
-    this.adopt(new PeerLink(conn, "host"), "host");
+    this.dialHost(peer);
     setTimeout(() => {
       if (this.connected || this.closed) return;
       this.close(
@@ -344,6 +354,67 @@ export class NetSession {
           : "Found the room but could not connect. One of you is on a strict network (often mobile data). Try both on home Wi-Fi.",
       );
     }, 20000);
+  }
+  private dialHost(peer: Broker) {
+    const conn = peer.connect(ROOM_PREFIX + this.roomCode, {
+      reliable: true,
+      serialization: "raw",
+      metadata: { id: this.selfId },
+    });
+    const link = new PeerLink(conn, "host");
+    this.adopt(link, "host");
+    return link;
+  }
+  /** Guests that dropped mid-session and keep their spot for now: peer → removal timer. */
+  private away = new Map<string, number>();
+  /** Reliable messages a dropped peer missed, replayed when it is back. */
+  private outbox = new Map<string, string[]>();
+  private rejoining = false;
+  /**
+   * Guest: a room-code link died (Wi-Fi blip, NAT rebinding). Dial the host again through
+   * a fresh broker; the host keeps our slot and car meanwhile.
+   */
+  private async rejoin() {
+    if (this.rejoining || this.closed) return;
+    this.rejoining = true;
+    this.onReconnecting(true);
+    const deadline = performance.now() + REJOIN_MS;
+    while (!this.closed && performance.now() < deadline) {
+      try {
+        this.broker?.destroy();
+        this.broker = null;
+        const peer = await openBroker();
+        if (this.closed) {
+          peer.destroy();
+          break;
+        }
+        this.broker = peer;
+        peer.on("error", () => {});
+        const link = this.dialHost(peer);
+        const opened = await new Promise<boolean>((resolve) => {
+          const start = performance.now(),
+            timer = setInterval(() => {
+              if (link.open || this.closed || performance.now() - start > 10000) {
+                clearInterval(timer);
+                resolve(link.open);
+              }
+            }, 100);
+        });
+        if (opened) {
+          this.rejoining = false;
+          for (const data of this.outbox.get("host")?.splice(0) ?? [])
+            link.send(data);
+          this.onReconnecting(false);
+          return;
+        }
+        link.close();
+      } catch {
+        /* Broker unreachable for now; retry below. */
+      }
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+    this.rejoining = false;
+    if (!this.closed) this.close("Lost connection to the host.");
   }
   /** Host: allow guests from other tabs of this browser to join by room code. */
   openLocalRoom() {
@@ -371,7 +442,7 @@ export class NetSession {
     link.onopen = () => {
       if (!this.isHost) this.sendTo(link, this.helloMessage());
     };
-    link.onclose = () => this.dropped(peer);
+    link.onclose = () => this.dropped(peer, link);
     if (link.open) link.onopen();
   }
   private helloMessage(): Message {
@@ -383,13 +454,34 @@ export class NetSession {
       visual: this.profile.visual,
     };
   }
-  private dropped(peer: string) {
+  private dropped(peer: string, link: Link) {
+    // A replaced link closing late must not drop its successor.
+    if (this.links.get(peer) !== link) return;
     this.links.delete(peer);
     if (this.closed) return;
+    const resumable = link instanceof PeerLink;
     if (!this.isHost) {
-      this.close("Lost connection to the host.");
+      if (resumable && this.roomCode && this.connectedOnce) void this.rejoin();
+      else if (!this.rejoining) this.close("Lost connection to the host.");
       return;
     }
+    const held = this.players.find((p) => p.id === peer);
+    if (held && resumable) {
+      clearTimeout(this.away.get(peer));
+      this.away.set(
+        peer,
+        window.setTimeout(() => this.removePlayer(peer), REJOIN_MS + 5000),
+      );
+      this.outbox.set(peer, this.outbox.get(peer) ?? []);
+      this.onPlayerAway(held.name, true);
+      return;
+    }
+    this.removePlayer(peer);
+  }
+  private removePlayer(peer: string) {
+    clearTimeout(this.away.get(peer));
+    this.away.delete(peer);
+    this.outbox.delete(peer);
     const p = this.players.find((p) => p.id === peer);
     this.players = this.players.filter((p) => p.id !== peer);
     if (p) {
@@ -409,10 +501,20 @@ export class NetSession {
     const data = JSON.stringify(msg);
     for (const [peer, link] of this.links)
       if (peer !== except) link.send(data, reliable);
+    if (reliable)
+      for (const peer of this.away.keys())
+        if (peer !== except) this.hold(peer, data);
   }
   private send(msg: Message, reliable = true) {
     if (this.isHost) this.broadcast(msg, undefined, reliable);
-    else this.sendTo(this.links.get("host"), msg, reliable);
+    else if (this.rejoining) {
+      if (reliable) this.hold("host", JSON.stringify(msg));
+    } else this.sendTo(this.links.get("host"), msg, reliable);
+  }
+  private hold(peer: string, data: string) {
+    const queue = this.outbox.get(peer) ?? [];
+    if (queue.length < 100) queue.push(data);
+    this.outbox.set(peer, queue);
   }
   private broadcastRoster() {
     for (const [peer, link] of this.links)
@@ -444,6 +546,19 @@ export class NetSession {
             t: "kick",
             reason: "Your game version does not match the host's.",
           });
+          return;
+        }
+        if (player) {
+          // A held player came back on a new link: replay what they missed.
+          const back = this.away.has(peer);
+          clearTimeout(this.away.get(peer));
+          this.away.delete(peer);
+          const link = this.links.get(peer);
+          for (const data of this.outbox.get(peer)?.splice(0) ?? [])
+            link?.send(data);
+          this.outbox.delete(peer);
+          this.broadcastRoster();
+          if (back) this.onPlayerAway(player.name, false);
           return;
         }
         if (this.inRace || this.players.length >= MAX_PLAYERS) {
@@ -512,15 +627,21 @@ export class NetSession {
       case "pong":
         if (player) player.ping = Math.round(performance.now() - finite(msg.ts));
         return;
-      case "leave":
-        this.links.get(peer)?.close();
+      case "leave": {
+        // Leaving on purpose frees the slot at once; only drops are held.
+        const link = this.links.get(peer);
+        this.links.delete(peer);
+        link?.close();
+        this.removePlayer(peer);
         return;
+      }
     }
   }
   private guestReceive(msg: Message) {
     switch (msg.t) {
       case "roster":
         if (!Array.isArray(msg.players)) return;
+        this.connectedOnce = true;
         this.selfId = typeof msg.you === "string" ? msg.you : this.selfId;
         this.players = msg.players.slice(0, MAX_PLAYERS).map((p) => ({
           ...this.lobbyEntry(String(p.id), p, p.host === true),
@@ -559,6 +680,10 @@ export class NetSession {
         return;
       }
       case "leave": {
+        if (msg.id === undefined) {
+          this.close("The host closed the room.");
+          return;
+        }
         const p = this.players.find((p) => p.id === msg.id);
         if (p) this.onPlayerLeft(p.name, p.id);
         return;
@@ -707,6 +832,8 @@ export class NetSession {
     if (this.closed) return;
     this.closed = true;
     clearInterval(this.pingTimer);
+    for (const timer of this.away.values()) clearTimeout(timer);
+    this.away.clear();
     try {
       this.send({ t: "leave" });
     } catch {

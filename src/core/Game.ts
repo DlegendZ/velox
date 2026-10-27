@@ -2137,6 +2137,20 @@ export class Game {
       this.audio.sfx("join");
       this.toast(`${name} joined the lobby.`, "online");
     };
+    n.onPlayerAway = (name, away) =>
+      this.toast(
+        away
+          ? `${name} lost connection. Holding their spot…`
+          : `${name} is back.`,
+        "online",
+      );
+    n.onReconnecting = (active) => {
+      if (active) this.audio.sfx("leave");
+      this.toast(
+        active ? "Connection lost. Reconnecting to the host…" : "Reconnected.",
+        "online",
+      );
+    };
     n.onPlayerLeft = (name, id) => {
       this.audio.sfx("leave");
       this.toast(`${name} left.`, "online");
