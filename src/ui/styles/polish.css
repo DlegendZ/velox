@@ -826,7 +826,7 @@ label,
   ):is(:hover, :focus-within)::-webkit-scrollbar-thumb {
   background: #78848b;
 }
-@media (max-width: 700px) {
+@media (max-width: 700px) and (orientation: portrait) {
   .result-position {
     font-size: 85px;
   }
@@ -1080,7 +1080,7 @@ body.input-keys #app :is(button, input, select, textarea, [tabindex]):focus {
     padding: var(--space-4);
   }
 }
-@media (max-width: 700px) {
+@media (max-width: 700px) and (orientation: portrait) {
   .race-setup {
     display: block;
     overflow-y: auto;
@@ -1175,7 +1175,7 @@ body.input-keys #app :is(button, input, select, textarea, [tabindex]):focus {
 .conditions {
   height: 100%;
 }
-@media (max-width: 700px) {
+@media (max-width: 700px) and (orientation: portrait) {
   .conditions {
     height: 520px;
   }
@@ -1306,7 +1306,7 @@ body.input-keys #app :is(button, input, select, textarea, [tabindex]):focus {
     gap: 8px;
   }
 }
-@media (max-width: 700px) {
+@media (max-width: 700px) and (orientation: portrait) {
   .garage-page {
     grid-template-rows: max-content max-content 40vh max-content 174px;
   }
@@ -1358,7 +1358,7 @@ body.input-keys #app :is(button, input, select, textarea, [tabindex]):focus {
   display: inline-block;
   max-width: 100%;
 }
-@media (max-width: 700px) {
+@media (max-width: 700px) and (orientation: portrait) {
   .season-line {
     grid-template-columns: repeat(4, 136px);
     overflow-x: auto;
@@ -1480,7 +1480,7 @@ body.input-keys #app :is(button, input, select, textarea, [tabindex]):focus {
   transform: translateY(2px);
   flex-shrink: 0;
 }
-@media (max-width: 700px) {
+@media (max-width: 700px) and (orientation: portrait) {
   .result-heading {
     height: auto;
     min-height: 96px;
@@ -1558,7 +1558,7 @@ body.input-keys #app :is(button, input, select, textarea, [tabindex]):focus {
     font-size: 20px;
   }
 }
-@media (max-width: 700px) {
+@media (max-width: 700px) and (orientation: portrait) {
   .home {
     display: block;
     padding: var(--space-5) var(--space-4);
@@ -1570,7 +1570,7 @@ body.input-keys #app :is(button, input, select, textarea, [tabindex]):focus {
     margin-top: var(--space-5);
   }
 }
-@media (max-width: 700px) {
+@media (max-width: 700px) and (orientation: portrait) {
   .home {
     display: flex;
     flex-direction: column;
@@ -1596,7 +1596,7 @@ body.input-keys #app :is(button, input, select, textarea, [tabindex]):focus {
     margin-top: 0;
   }
 }
-@media (max-width: 700px) {
+@media (max-width: 700px) and (orientation: portrait) {
   .home-menu {
     position: relative;
     isolation: isolate;
@@ -1805,7 +1805,7 @@ body.input-keys #app :is(button, input, select, textarea, [tabindex]):focus {
   transition: opacity 200ms;
   pointer-events: none;
 }
-@media (max-width: 800px),
+@media (max-width: 800px) and (orientation: portrait),
   (pointer: coarse),
   (max-height: 500px) and (max-width: 1100px) {
   .touch-controls {
@@ -1867,7 +1867,7 @@ body.input-keys #app :is(button, input, select, textarea, [tabindex]):focus {
     gap: var(--space-2);
   }
 }
-@media (max-width: 800px) {
+@media (max-width: 800px) and (orientation: portrait) {
   .race-laps {
     top: var(--hud-safe);
     right: var(--hud-safe);
@@ -1922,7 +1922,7 @@ body.input-keys #app :is(button, input, select, textarea, [tabindex]):focus {
     width: 500px;
   }
 }
-@media (max-width: 800px),
+@media (max-width: 800px) and (orientation: portrait),
   (pointer: coarse),
   (max-height: 500px) and (max-width: 1100px) {
   .touch-pedals {
@@ -2430,7 +2430,7 @@ textarea,
   text-overflow: ellipsis;
 }
 @media (max-width: 1366px) { .mode-full { display: none; } }
-@media (max-width: 700px) { .garage-page > .page-heading { background: var(--bg-0); } }
+@media (max-width: 700px) and (orientation: portrait) { .garage-page > .page-heading { background: var(--bg-0); } }
 @media (pointer: coarse) {
   #app :is(button,[data-action],input,select,textarea) { min-width: 48px; min-height: 48px; }
   #app .garage-rail button { min-height: 56px; }

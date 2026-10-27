@@ -1,0 +1,11 @@
+{
+  "name": "VELOX",
+  "short_name": "VELOX",
+  "description": "An original 3D arcade racing game.",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#07090d",
+  "theme_color": "#090d13",
+  "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

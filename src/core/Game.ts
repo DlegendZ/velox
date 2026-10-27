@@ -48,6 +48,7 @@ import { TUNING } from "../data/tuning";
 import { Screens, fmt, formatTime, formatDelta, esc } from "../ui/Screens";
 import { cleanRoomCode, NetSession, type NetConfig } from "../net/Session";
 import { checkNetwork, type NetworkKind } from "../net/Link";
+import { isPortraitPhone } from "../ui/Mobile";
 import type { NetPlayer } from "../game/RaceManager";
 const MENU_STATES: State[] = [
   "title",
@@ -336,6 +337,11 @@ export class Game {
     canvas.addEventListener("webglcontextrestored", () => {
       this.net?.close("Graphics driver reset; the game reloaded.");
       location.reload();
+    });
+    // Turning a phone upright mid-race covers the game with the rotate prompt.
+    matchMedia("(orientation: portrait)").addEventListener("change", () => {
+      if (isPortraitPhone() && this.machine.current === "race")
+        this.machine.go("pause");
     });
     window.addEventListener("beforeunload", () => {
       this.net?.close("Closed or reloaded the game.");

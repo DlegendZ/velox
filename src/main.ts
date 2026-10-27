@@ -12,8 +12,11 @@ import "./ui/styles/hud.css";
 import "./ui/styles/overlays.css";
 import "./ui/styles/polish.css";
 import "./ui/styles/refine.css";
+import "./ui/styles/phone.css";
 import { AssetLoader } from "./core/AssetLoader";
 import { bootScreen, setGauge } from "./ui/Loader";
+import { installMobile } from "./ui/Mobile";
+installMobile();
 const app = document.querySelector<HTMLElement>("#app")!;
 app.innerHTML = bootScreen();
 const loader = new AssetLoader(2, (n, label) =>

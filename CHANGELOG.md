@@ -1,5 +1,13 @@
 # VELOX changelog
 
+## 0.10.0 — Phones, in landscape
+
+- VELOX plays on phones in landscape. Upright phones show a TURN YOUR PHONE prompt (and a race pauses if the phone is turned mid-race); on Android the first tap goes fullscreen and locks landscape. Adding the site to the home screen opens it fullscreen in landscape.
+- Phone layout (phone.css): a slim header, no keyboard footer, and every page scrolls instead of squeezing its panels. The menu, two-step race setup, garage, career, settings, online entry and meet-up, pause and results all fit 667x375 to 932x430 with touch targets of at least 44 px.
+- Race controls on phones keep their on-screen size whatever the HUD scale: a wide steering pad, large GAS and BRAKE pedals, DRIFT and N2O above them, and CAM and RESET under the position. Keyboard hints and keycaps are hidden on touch screens, and the title says TAP TO START.
+- Graphics default to the light preset on phones, at a sharper 1.25x render scale.
+- Narrow-screen styles written for upright phones now apply only in portrait, so landscape phones get the full layout.
+
 ## 0.9.4 — Open garage for online rooms
 
 - The host can set GARAGE to ALL MAXED in the meet-up. Everyone in the room may then pick any car in the garage (RACE THIS ONLINE) and races it with every upgrade at level 5. Owned cars keep their paint; nothing is bought and saves and credits are not changed. Switching back to OWN CARS returns each player to their own active car.

@@ -1,3 +1,4 @@
+import { isPhone } from "../ui/Mobile";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { Reflector } from "three/addons/objects/Reflector.js";
@@ -601,11 +602,17 @@ export class Renderer {
   setQuality(quality: string) {
     this.automatic = quality === "auto";
     this.quality =
-      quality === "auto" ? (innerWidth < 700 ? "low" : "medium") : quality;
+      quality === "auto"
+        ? innerWidth < 700 || isPhone()
+          ? "low"
+          : "medium"
+        : quality;
     CarFactory.premium = this.quality === "high" || this.quality === "ultra";
     let dpr =
       this.quality === "low"
-        ? 0.8
+        ? isPhone()
+          ? Math.min(devicePixelRatio, 1.25)
+          : 0.8
         : this.quality === "ultra"
           ? Math.min(devicePixelRatio, 2)
           : Math.min(devicePixelRatio, 1.4);

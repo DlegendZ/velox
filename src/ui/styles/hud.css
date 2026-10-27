@@ -576,7 +576,7 @@
     top: 24px;
   }
 }
-@media (max-width: 800px), (pointer: coarse) {
+@media (max-width: 800px) and (orientation: portrait), (pointer: coarse) {
   .touch-controls {
     display: block;
   }
@@ -684,7 +684,7 @@
     left: 18px;
   }
 }
-@media (max-width: 800px) {
+@media (max-width: 800px) and (orientation: portrait) {
   .race-position {
     left: 18px;
     top: 18px;
@@ -856,7 +856,7 @@
     transition: none !important;
   }
 }
-@media (max-width: 800px) {
+@media (max-width: 800px) and (orientation: portrait) {
   .hud-pause {
     width: 64px;
     height: 64px;

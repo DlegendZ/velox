@@ -1,0 +1,523 @@
+/* ============================================================ phones (landscape)
+   html.phone is set by Mobile.ts for touch phones and short landscape windows. The
+   header shrinks, the keyboard footer goes, and every page scrolls instead of
+   squeezing its panels to fit 360–430 px of height. */
+
+/* Portrait phones: the game waits behind a rotate prompt. */
+.rotate-prompt {
+  display: none;
+}
+@media (orientation: portrait) and (max-width: 600px) and (pointer: coarse) {
+  .rotate-prompt {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 32px;
+    text-align: center;
+    background: #07090d;
+    color: var(--text-1);
+  }
+}
+.rotate-prompt b {
+  font: 800 italic 26px var(--font-display);
+  letter-spacing: 0.02em;
+}
+.rotate-prompt span {
+  font-size: 15px;
+  color: var(--text-2);
+}
+.rotate-phone {
+  width: 54px;
+  height: 92px;
+  border: 3px solid var(--accent);
+  border-radius: 10px;
+  position: relative;
+  animation: rotate-phone 2.2s ease-in-out infinite;
+}
+.rotate-phone i {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  width: 14px;
+  height: 3px;
+  margin-left: -7px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+@keyframes rotate-phone {
+  0%,
+  25% {
+    transform: rotate(0deg);
+  }
+  60%,
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rotate-phone {
+    animation: none;
+    transform: rotate(-90deg);
+  }
+}
+
+/* Touch screens never show keyboard hints. */
+html.touch #app :is(.driving-hints, .footer-right) {
+  display: none !important;
+}
+
+/* ---------------------------------------------------------------- frame */
+html.phone {
+  --header-height: 46px;
+  --footer-height: 0px;
+}
+html.phone #app .header {
+  height: 46px;
+  min-height: 46px;
+  padding: 0 max(14px, env(safe-area-inset-right)) 0
+    max(14px, env(safe-area-inset-left));
+}
+html.phone #app .header .wordmark {
+  font-size: 22px;
+}
+html.phone #app .header .breadcrumb {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+html.phone #app .header .profile-button > b {
+  display: none;
+}
+html.phone #app .header .level-ring {
+  width: 32px;
+  height: 32px;
+}
+html.phone #app .header .credits {
+  font-size: 18px;
+}
+html.phone #app .footer {
+  display: none;
+}
+/* Every page scrolls on its own below the header. */
+html.phone #app :is(.page, .race-setup, .garage-page, .results-page, .home, .profile-page) {
+  height: calc(100dvh - 46px);
+  max-height: calc(100dvh - 46px);
+  padding: 10px max(16px, env(safe-area-inset-right)) 18px
+    max(16px, env(safe-area-inset-left));
+}
+html.phone #app :is(.page, .race-setup, .results-page, .profile-page) {
+  overflow-y: auto;
+}
+html.phone #app .page-heading {
+  margin: 0 0 10px;
+}
+html.phone #app .page-heading .eyebrow {
+  margin: 0;
+  font-size: 12px;
+}
+html.phone #app .page-heading h1 {
+  margin: 2px 0 0;
+  font-size: 26px;
+  line-height: 1.05;
+}
+html.phone #app .page-heading .description {
+  display: none;
+}
+html.phone #app .back-link {
+  min-height: 40px;
+}
+
+/* ---------------------------------------------------------------- main menu */
+html.phone #app .home {
+  grid-template-columns: minmax(0, 40%) minmax(0, 1fr) minmax(0, 28%);
+  gap: 12px;
+  align-items: stretch;
+}
+html.phone #app .home-menu {
+  overflow-y: auto;
+  max-height: 100%;
+  padding-right: 6px;
+}
+html.phone #app .home-menu > .eyebrow {
+  margin: 0 0 4px;
+}
+html.phone #app .home-entry {
+  min-height: 44px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+html.phone #app .home-entry b,
+html.phone #app .home-entry strong {
+  font-size: 26px;
+}
+html.phone #app .ride-ticket {
+  align-self: stretch;
+  overflow-y: auto;
+  gap: 8px;
+  justify-content: center;
+}
+html.phone #app :is(.your-ride, .daily-ticket) {
+  padding: 12px;
+}
+
+/* ------------------------------------------------------- race setup (2 steps) */
+html.phone #app .race-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+html.phone #app .race-setup > *,
+html.phone #app .setup-body,
+html.phone #app .track-browser {
+  flex: 0 0 auto;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+}
+html.phone #app .setup-heading {
+  margin: 0;
+}
+html.phone #app .setup-heading h1 {
+  font-size: 26px;
+  margin: 2px 0 0;
+}
+html.phone #app .mode-tab {
+  min-height: 44px;
+}
+html.phone #app .carousel {
+  height: 220px;
+  min-height: 220px;
+  flex: 0 0 220px;
+}
+html.phone #app .carousel-slot .track-card {
+  min-height: 0;
+}
+html.phone #app .conditions-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 12px;
+  height: auto;
+  min-height: 0;
+}
+html.phone #app .conditions-layout > * {
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+html.phone #app .conditions {
+  padding: 14px;
+}
+html.phone #app .setup-next-row {
+  position: sticky;
+  bottom: -18px;
+  padding: 8px 0;
+  background: linear-gradient(transparent, #07090d 40%);
+  z-index: 2;
+}
+
+/* ------------------------------------------------------------------ garage */
+html.phone #app .garage-page,
+html.phone #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) {
+  grid-template-columns: 132px minmax(0, 1fr) minmax(250px, 320px);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: "head head info" "rail stage info" "rail strip info";
+  gap: 8px 12px;
+}
+html.phone #app .garage-page .page-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+html.phone #app .garage-page .page-heading h1 {
+  font-size: 22px;
+}
+html.phone #app .garage-tabs button {
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+html.phone #app .garage-tabs button::before {
+  margin-right: 6px;
+  font-size: 14px;
+}
+html.phone #app .garage-page .garage-strip,
+html.phone #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) .garage-strip {
+  display: grid;
+  grid-area: strip;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+}
+html.phone #app .garage-arrow {
+  width: 44px;
+  height: 44px;
+}
+html.phone #app .car-row {
+  width: 150px;
+  flex-basis: 150px;
+  height: 104px;
+  min-height: 104px;
+}
+html.phone #app .car-row .car-thumbnail {
+  height: 60px;
+  flex: 0 0 60px;
+}
+html.phone #app .garage-info {
+  grid-area: info;
+  align-self: stretch;
+  height: 100%;
+  max-height: 100%;
+  padding: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+html.phone #app .garage-info-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+html.phone #app .garage-info h2 {
+  font-size: 22px;
+}
+html.phone #app .orbit-hint {
+  display: none;
+}
+
+/* ----------------------------------------------------------------- results */
+html.phone #app .results-page {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+html.phone #app .results-page > * {
+  flex: 0 0 auto;
+}
+html.phone #app .result-heading h1 {
+  font-size: 34px;
+}
+html.phone #app .result-columns {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+}
+html.phone #app .result-card {
+  max-height: none;
+  overflow: visible;
+}
+html.phone #app .result-actions {
+  position: sticky;
+  bottom: -18px;
+  z-index: 2;
+  padding: 8px 0;
+  background: linear-gradient(transparent, #07090d 35%);
+}
+html.phone #app .result-actions .button {
+  min-height: 52px;
+}
+
+/* ------------------------------------------------------------------ online */
+html.phone #app .meet-page {
+  overflow-y: auto;
+}
+html.phone #app .meet-grid {
+  flex: 0 0 auto;
+  grid-template-columns: minmax(250px, 0.9fr) minmax(0, 1.4fr);
+  grid-template-rows: auto auto auto;
+  grid-template-areas: "room race" "drivers race" "chat chat";
+}
+html.phone #app .meet-race {
+  min-height: 330px;
+}
+html.phone #app .meet-race-body {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+}
+html.phone #app .meet-grid .chat-panel {
+  min-height: 200px;
+}
+html.phone #app .card-head .text-button {
+  min-height: 44px;
+}
+html.phone #app .net-entry .net-card {
+  min-height: 0;
+  padding: 16px;
+}
+html.phone #app input.room-input {
+  height: 56px;
+  min-height: 56px;
+  font-size: 30px;
+}
+
+/* -------------------------------------------------------------- race HUD */
+html.phone #app .touch-utilities .plate {
+  min-width: 52px;
+}
+
+/* ------------------------------------------------------------- round two */
+html.phone #app .home-entry {
+  min-height: 44px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+html.phone #app .home-entry :is(b, strong, h2, h3) {
+  font-size: 22px;
+  line-height: 1.1;
+}
+/* Setup: the breadcrumb names the step, so the big title gives its room to the cards. */
+html.phone #app .race-setup .setup-heading h1,
+html.phone #app .race-setup .carousel-commands {
+  display: none;
+}
+html.phone #app .carousel {
+  height: 190px;
+  min-height: 190px;
+  flex-basis: 190px;
+}
+html.phone #app .setup-track .setup-next-row {
+  position: static;
+  background: none;
+  padding: 0;
+}
+html.phone #app .garage-tabs button {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+/* Pause: compact panel, the circuit map and order stay beside it. */
+html.phone #app .pause-layout {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+  gap: 12px;
+  padding: 10px max(16px, env(safe-area-inset-right)) 10px
+    max(16px, env(safe-area-inset-left));
+  height: 100dvh;
+  max-height: 100dvh;
+}
+html.phone #app :is(.pause-panel, .pause-side) {
+  overflow-y: auto;
+  max-height: calc(100dvh - 20px);
+  padding: 14px;
+}
+html.phone #app .pause-panel h1 {
+  font-size: 34px;
+  margin: 2px 0 8px;
+}
+html.phone #app .pause-chips {
+  margin-bottom: 8px;
+}
+html.phone #app .pause-entry {
+  min-height: 48px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+html.phone #app .pause-side .pause-map svg {
+  max-height: 120px;
+}
+/* Online: settings over the map, nothing truncated. */
+html.phone #app .meet-race-body {
+  grid-template-columns: minmax(0, 1fr);
+}
+html.phone #app .meet-race .lobby-map {
+  height: 190px;
+}
+html.phone #app .net-steps {
+  display: none;
+}
+html.phone #app .net-entry {
+  gap: 12px;
+}
+html.phone #app .net-footer {
+  margin-top: 12px;
+}
+/* Race: the HUD is drawn at --hud-scale, so touch sizes divide by it to stay
+   thumb-sized on screen. Utilities sit under the position plate. */
+html.phone #app .touch-utilities {
+  left: var(--hud-safe);
+  right: auto;
+  top: calc(var(--hud-safe) + 70px / var(--hud-scale));
+  bottom: auto;
+  transform: none;
+}
+html.phone #app .touch-utilities button {
+  width: auto;
+  padding: 0 calc(10px / var(--hud-scale));
+  min-width: calc(60px / var(--hud-scale));
+  height: calc(44px / var(--hud-scale));
+  font-size: calc(13px / var(--hud-scale));
+}
+html.phone #app .touch-pedals {
+  right: calc(16px / var(--hud-scale));
+  bottom: calc(12px / var(--hud-scale));
+  grid-template-columns: calc(70px / var(--hud-scale)) calc(84px / var(--hud-scale));
+  gap: calc(8px / var(--hud-scale));
+}
+html.phone #app .touch-pedals button {
+  width: 100%;
+  height: calc(50px / var(--hud-scale));
+  font-size: calc(13px / var(--hud-scale));
+}
+html.phone #app .touch-pedals :is([data-touch="brake"], [data-touch="throttle"]) {
+  height: calc(80px / var(--hud-scale));
+}
+html.phone #app .drag-pad {
+  left: calc(16px / var(--hud-scale));
+  bottom: calc(12px / var(--hud-scale));
+  width: 40%;
+  height: calc(120px / var(--hud-scale));
+}
+html.phone #app .drag-thumb {
+  width: calc(56px / var(--hud-scale));
+  height: calc(56px / var(--hud-scale));
+}
+html.phone #app .drag-pad span {
+  font-size: calc(12px / var(--hud-scale));
+}
+
+/* Keycaps mean nothing on a touch screen. */
+html.touch #app kbd {
+  display: none;
+}
+html.phone #app .speedometer {
+  bottom: calc(162px / var(--hud-scale));
+}
+html.phone #app .pause-layout {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+}
+
+/* Narrow phones (iPhone SE/8 landscape and similar). */
+html.phone #app .conditions-layout {
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+}
+html.phone #app .conditions .segmented {
+  flex-wrap: wrap;
+}
+html.phone #app .conditions .segmented button {
+  min-width: 44px;
+}
+html.phone #app .garage-page,
+html.phone #app .garage-page:is(.garage-tab-performance, .garage-tab-visual) {
+  grid-template-columns: 132px minmax(0, 1fr) minmax(220px, 36vw);
+}
+html.phone #app .speedometer {
+  transform: scale(0.8);
+  transform-origin: 100% 100%;
+}
+html.phone #app .garage-info .spec-line b {
+  font-size: 22px;
+}
+
+/* No double-tap zoom, text selection or long-press menus while playing. */
+html.touch {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+html.touch #app :is(button, .race-hud, .home-entry) {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}

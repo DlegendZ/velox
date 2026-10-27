@@ -574,7 +574,7 @@ body.input-keys #app .mode-tab:focus:not(.selected) {
     overflow: visible;
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 760px) and (orientation: portrait) {
   #app .setup-conditions .condition-row {
     grid-template-columns: minmax(0, 1fr);
     gap: 8px;
@@ -844,7 +844,7 @@ body.input-keys #app .mode-tab:focus:not(.selected) {
   color: var(--accent-ink);
   background: var(--accent);
 }
-@media (max-width: 760px) {
+@media (max-width: 760px) and (orientation: portrait) {
   #app .load-shell {
     grid-template-columns: minmax(0, 1fr);
     justify-items: center;
@@ -1986,7 +1986,7 @@ body.input-keys #app .mode-tab:focus:not(.selected) {
       "chat race";
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 760px) and (orientation: portrait) {
   #app .net-entry,
   #app .net-manual {
     grid-template-columns: 1fr;
@@ -2127,7 +2127,7 @@ body.input-keys #app .mode-tab:focus:not(.selected) {
     margin-bottom: 0;
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 760px) and (orientation: portrait) {
   #app .meet-grid {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: none;
