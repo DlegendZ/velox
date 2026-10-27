@@ -13,6 +13,7 @@ import { TRACKS, type RaceMode } from "../data/tracks";
 import {
   newOwned,
   type GhostFrame,
+  type OwnedCar,
   type Save,
   type Visual,
 } from "../core/Save";
@@ -190,6 +191,11 @@ export class RaceManager {
     public config: RaceConfig,
     public save: Save,
     public net: NetRace | null = null,
+    /** The car to drive when it is not the save's active car (open-garage online rooms). */
+    car: { id: string; owned: OwnedCar } = {
+      id: save.data.garage.activeCar,
+      owned: save.active,
+    },
   ) {
     this.world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
     this.world.timestep = TUNING.step;
@@ -211,20 +217,20 @@ export class RaceManager {
     this.root.add(this.sky.root);
     const playerSpot = this.gridSpot(
       net ? net.localSlot : 0,
-      carById(save.data.garage.activeCar).length,
+      carById(car.id).length,
     );
     this.player = new VehicleController(
       this.world,
-      carById(save.data.garage.activeCar),
-      save.active,
+      carById(car.id),
+      car.owned,
       playerSpot.point,
       playerSpot.yaw,
     );
     this.addVehicle(
       this.player,
       save.data.profile.name,
-      save.active.visual.paint,
-      save.active.visual,
+      car.owned.visual.paint,
+      car.owned.visual,
     );
     const rivals =
       config.mode === "race" || config.mode === "elimination"
@@ -278,7 +284,7 @@ export class RaceManager {
     if (config.mode === "time" && record?.ghost) {
       this.ghost = CarFactory.buildProcedural(
         this.player.spec,
-        save.active.visual,
+        car.owned.visual,
         false,
       );
       const ghostly = (m: THREE.Material) => {

@@ -28,6 +28,7 @@ import { CAREER_EVENTS, TIERS } from "../data/careerEvents";
 import { ACHIEVEMENTS, dailyChallenge } from "../data/achievements";
 import { CAMERA_NAMES } from "../render/CameraRig";
 import { MAX_PLAYERS, ROOM_LENGTH } from "../net/Session";
+import { lentCar } from "../core/Save";
 import { hasRelay } from "../net/Link";
 import type { Game } from "../core/Game";
 const paths: Record<string, string> = {
@@ -179,7 +180,7 @@ export class Screens {
   }
   menu(title: boolean) {
     if (title)
-      return '<main class="title-screen"><h1>VELOX</h1><p>AFTER HOURS MOTOR CLUB</p><button data-action="enter" data-autofocus>PRESS ANY KEY</button><span class="version">0.9.3 / ORIGINAL MACHINES</span></main>';
+      return '<main class="title-screen"><h1>VELOX</h1><p>AFTER HOURS MOTOR CLUB</p><button data-action="enter" data-autofocus>PRESS ANY KEY</button><span class="version">0.9.4 / ORIGINAL MACHINES</span></main>';
     const g = this.g,
       c = carById(g.save.data.garage.activeCar),
       d = dailyChallenge(),
@@ -257,11 +258,13 @@ export class Screens {
       id = g.previewCar,
       c = carById(id),
       owned = g.save.data.garage.owned[id],
-      o = owned ?? g.save.active,
+      open = g.openGarage,
+      ride = open ? g.raceCar().id : g.save.data.garage.activeCar,
+      o = open ? lentCar(id, owned) : (owned ?? g.save.active),
       v = o.visual;
     const carList = `<div class="car-list" aria-label="Car carousel">${CARS.filter(
       (c) =>
-        (g.garageTab === "dealer" || g.save.data.garage.owned[c.id]) &&
+        (open || g.garageTab === "dealer" || g.save.data.garage.owned[c.id]) &&
         (g.garageCap === null ||
           PI(
             c,
@@ -270,15 +273,15 @@ export class Screens {
     )
       .map((c) => {
         const own = !!g.save.data.garage.owned[c.id];
-        return `<button class="car-row ${c.id === id ? "selected" : ""}" data-action="preview-${c.id}" aria-label="Preview ${c.name}">${c.id === g.save.data.garage.activeCar ? '<em class="active-car-badge">ACTIVE</em>' : ""}${carThumb(c, g.renderer.carThumbnails.get(c.id))}<span class="car-card-copy"><b>${c.name}</b><small>${c.drive} · ${c.type}</small></span><span class="row-tail">${own ? "OWNED" : g.save.data.profile.level < c.level ? `${icon("lock")}<small>LV ${c.level}</small>` : `${fmt(c.price)} <small>CR</small>`}</span></button>`;
+        return `<button class="car-row ${c.id === id ? "selected" : ""}" data-action="preview-${c.id}" aria-label="Preview ${c.name}">${c.id === ride ? `<em class="active-car-badge">${open ? "ONLINE" : "ACTIVE"}</em>` : ""}${carThumb(c, g.renderer.carThumbnails.get(c.id))}<span class="car-card-copy"><b>${c.name}</b><small>${c.drive} · ${c.type}</small></span><span class="row-tail">${own ? "OWNED" : g.save.data.profile.level < c.level ? `${icon("lock")}<small>LV ${c.level}</small>` : `${fmt(c.price)} <small>CR</small>`}</span></button>`;
       })
       .join(
         "",
       )}${g.garageTab !== "dealer" ? '<button class="car-row dealer-card" data-action="tab-dealer" aria-label="Open Dealer">+ DEALER</button>' : ""}</div>`;
     let panel = "";
     if (g.garageTab === "performance")
-      panel = owned
-        ? `<div class="upgrade-list">${UPGRADES.map((u) => {
+      panel = owned || open
+        ? `${open ? '<p class="open-garage-note">OPEN GARAGE: every car races with all upgrades at level 5 in this room. Your own cars and credits are not touched.</p>' : ""}<div class="upgrade-list">${UPGRADES.map((u) => {
             const level = o.upgrades[u.id],
               cost = UPGRADE_COSTS[level];
             return `<div class="upgrade-row"><div><b>${u.name}</b><small>${u.detail}</small><div class="upgrade-pips">${Array.from({ length: 5 }, (_, i) => `<i class="${i < level ? "filled" : i === level ? "preview" : ""}"></i>`).join("")}</div></div><button class="upgrade-buy" data-action="upgrade-${u.id}" ${cost === undefined || g.save.data.profile.credits < cost ? "disabled" : ""}>${cost === undefined ? "MAX" : g.save.data.profile.credits < cost ? `Need ${fmt(cost - g.save.data.profile.credits)} more CR` : `BUY · ${fmt(cost)} CR`}<small>${cost === undefined ? "LEVEL 5" : `+12 PI · LV ${level + 1}`}</small></button></div>`;
@@ -344,7 +347,7 @@ export class Screens {
             o.upgrades.suspension * 0.15,
           ][i],
       );
-    return `${this.header("garage")}<main class="garage-page scroll-page garage-tab-${g.garageTab}">${this.top("THE WORKSHOP", "YOUR GARAGE")}<div class="garage-tabs garage-rail" role="tablist">${[
+    return `${this.header("garage")}<main class="garage-page scroll-page garage-tab-${g.garageTab}">${open ? this.top("ONLINE ROOM · OPEN GARAGE", "PICK ANY CAR") : this.top("THE WORKSHOP", "YOUR GARAGE")}<div class="garage-tabs garage-rail" role="tablist">${[
       ["collection", "MY CARS"],
       ["dealer", "DEALER"],
       ["performance", "PERFORMANCE"],
@@ -356,7 +359,7 @@ export class Screens {
       )
       .join(
         "",
-      )}</div><div class="garage-stage" aria-label="3D car preview"><div class="orbit-hint">${icon("refresh")} DRAG TO LOOK AROUND</div></div><section class="garage-strip garage-panel"><button class="garage-arrow" data-action="garage-prev" aria-label="Previous car">←</button>${carList}<button class="garage-arrow" data-action="garage-next" aria-label="Next car">→</button></section><section class="garage-car-info garage-info"><div class="garage-info-content">${g.garageCap !== null ? `<p class="filter-label">MAX PI ${g.garageCap} <button data-action="garage-clear-filter">CLEAR FILTER</button></p>` : ""}<p class="eyebrow">${c.type} / ${c.drive}</p><h2>${c.name.toUpperCase()}</h2><div class="spec-line"><span><b>${c.topSpeed + o.upgrades.engine * 5 + o.upgrades.turbo * 3}</b> KM/H</span><span><b>${Math.max(2, c.acceleration - o.upgrades.turbo * 0.25).toFixed(1)}</b> 0–100 S</span><span><b>${Math.round(c.massKg * (1 - o.upgrades.weight * 0.035))}</b> KG</span></div><div class="stat-bars">${["TOP SPEED", "ACCELERATION", "HANDLING", "DRIFT"].map((name, i) => `<div><span>${name}</span><i><b style="width:${c.stats[i] * 10}%"></b><b class="boost" style="left:${c.stats[i] * 10}%;width:${(stat(i) - c.stats[i]) * 10}%"></b></i><strong>${stat(i).toFixed(1)}</strong></div>`).join("")}</div>${panel ? `<div class="garage-tools">${panel}</div>` : ""}</div><div class="garage-activate"><span class="class-badge">${carClass(PI(c, o.upgrades))} ${PI(c, o.upgrades)}</span>${owned ? `<button class="button ${g.save.data.garage.activeCar === id ? "secondary" : "primary"}" data-action="activate-${id}">${g.save.data.garage.activeCar === id ? "CURRENT RIDE" : `SELECT CAR ${icon("check")}`}</button>` : `<button class="button primary" data-action="buy-${id}" ${g.save.data.profile.level < c.level || g.save.data.profile.credits < c.price ? "disabled" : ""}>${g.save.data.profile.level < c.level ? `UNLOCK AT LEVEL ${c.level}` : `BUY · ${fmt(c.price)} CR`}</button>`}</div></section></main>${this.footer()}`;
+      )}</div><div class="garage-stage" aria-label="3D car preview"><div class="orbit-hint">${icon("refresh")} DRAG TO LOOK AROUND</div></div><section class="garage-strip garage-panel"><button class="garage-arrow" data-action="garage-prev" aria-label="Previous car">←</button>${carList}<button class="garage-arrow" data-action="garage-next" aria-label="Next car">→</button></section><section class="garage-car-info garage-info"><div class="garage-info-content">${g.garageCap !== null ? `<p class="filter-label">MAX PI ${g.garageCap} <button data-action="garage-clear-filter">CLEAR FILTER</button></p>` : ""}<p class="eyebrow">${c.type} / ${c.drive}</p><h2>${c.name.toUpperCase()}</h2><div class="spec-line"><span><b>${c.topSpeed + o.upgrades.engine * 5 + o.upgrades.turbo * 3}</b> KM/H</span><span><b>${Math.max(2, c.acceleration - o.upgrades.turbo * 0.25).toFixed(1)}</b> 0–100 S</span><span><b>${Math.round(c.massKg * (1 - o.upgrades.weight * 0.035))}</b> KG</span></div><div class="stat-bars">${["TOP SPEED", "ACCELERATION", "HANDLING", "DRIFT"].map((name, i) => `<div><span>${name}</span><i><b style="width:${c.stats[i] * 10}%"></b><b class="boost" style="left:${c.stats[i] * 10}%;width:${(stat(i) - c.stats[i]) * 10}%"></b></i><strong>${stat(i).toFixed(1)}</strong></div>`).join("")}</div>${panel ? `<div class="garage-tools">${panel}</div>` : ""}</div><div class="garage-activate"><span class="class-badge">${carClass(PI(c, o.upgrades))} ${PI(c, o.upgrades)}</span>${open ? `<button class="button ${ride === id ? "secondary" : "primary"}" data-action="online-car-${id}">${ride === id ? "ONLINE RIDE" : `RACE THIS ONLINE ${icon("check")}`}</button>` : owned ? `<button class="button ${g.save.data.garage.activeCar === id ? "secondary" : "primary"}" data-action="activate-${id}">${g.save.data.garage.activeCar === id ? "CURRENT RIDE" : `SELECT CAR ${icon("check")}`}</button>` : `<button class="button primary" data-action="buy-${id}" ${g.save.data.profile.level < c.level || g.save.data.profile.credits < c.price ? "disabled" : ""}>${g.save.data.profile.level < c.level ? `UNLOCK AT LEVEL ${c.level}` : `BUY · ${fmt(c.price)} CR`}</button>`}</div></section></main>${this.footer()}`;
   }
   modes() {
     return this.tracks();
@@ -741,6 +744,14 @@ export class Screens {
         ["roam", "CRUISE"],
       ],
       c.mode,
+      !host,
+    )}</label><label class="meet-option"><span>GARAGE</span>${select(
+      'id="net-garage"',
+      [
+        ["own", "OWN CARS"],
+        ["open", "ALL MAXED"],
+      ],
+      c.garage,
       !host,
     )}</label><div class="race-options">${this.raceOptions({ ...g.config, ...c }, !host, false)}</div>`;
     return `${this.header("lobby")}<main class="page lobby-page meet-page">${this.top(host ? "YOU ARE HOSTING" : "CONNECTED TO HOST", "THE MEET-UP")}<div class="meet-grid">${roomPanel}<section class="net-card meet-drivers"><div class="card-head"><p class="eyebrow">DRIVERS</p><button class="text-button" data-action="garage">CHANGE CAR ${icon("car")}</button></div><div class="lobby-players">${players}</div></section><section class="net-card meet-race"><div class="meet-race-head"><div><p class="eyebrow">THE RACE${host ? "" : " · HOST DECIDES"}</p><h2>${esc(track?.name ?? "")}${c.reverse ? " · REVERSE" : ""}</h2></div>${host ? `<button class="button primary start-button" data-action="net-start" ${n.canStart && n.players.length >= 2 ? "" : "disabled"}>${n.players.length < 2 ? "WAITING FOR DRIVERS" : n.canStart ? "START RACE" : "WAITING FOR READY"} ${icon("flag")}</button>` : ""}</div><div class="meet-race-body"><div class="meet-options">${options}</div><div class="lobby-map">${this.mapSVG(c.track, c.reverse)}<div class="map-picker">${host ? `<button class="garage-arrow" data-action="net-track-prev" aria-label="Previous track">←</button>` : ""}<div><small>${trackIndex + 1} / ${TRACKS.length} · ${esc(track?.length === "gp" ? "GRAND PRIX" : "CIRCUIT")}</small><b>${esc(track?.name ?? "")}</b></div>${host ? `<button class="garage-arrow" data-action="net-track-next" aria-label="Next track">→</button>` : ""}</div></div></div></section><section class="net-card chat-panel"><p class="eyebrow">CHAT</p><div class="chat-log">${g.chatLog.map((m) => `<p><b>${esc(m.name)}</b> ${esc(m.text)}</p>`).join("") || '<p class="muted">Say hi.</p>'}</div><div class="chat-row"><input type="text" id="chat-input" maxlength="80" placeholder="Message" autocomplete="off" data-keep><button class="button secondary" data-action="net-chat" aria-label="Send">${icon("send")}</button></div><button class="danger text-button leave-button" data-action="net-leave">LEAVE ${host ? "AND CLOSE ROOM" : "LOBBY"} ${icon("back")}</button></section></div></main>${this.footer()}`;

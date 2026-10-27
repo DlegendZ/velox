@@ -113,6 +113,16 @@ export interface SaveData {
   };
 }
 export const SAVE_KEY = "velox_save_v1";
+/** A car lent for an open-garage online room: your paint if you own it, every upgrade maxed. */
+export function lentCar(id: string, base: OwnedCar = newOwned(id)): OwnedCar {
+  const top = UPGRADE_COSTS.length;
+  return {
+    ...base,
+    upgrades: Object.fromEntries(
+      Object.keys(base.upgrades).map((k) => [k, top]),
+    ) as OwnedCar["upgrades"],
+  };
+}
 export function newOwned(id: string): OwnedCar {
   return {
     upgrades: {

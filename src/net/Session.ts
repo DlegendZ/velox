@@ -28,7 +28,10 @@ export interface LobbyPlayer {
 export type NetConfig = Pick<
   RaceConfig,
   "mode" | "track" | "laps" | "reverse" | "weather"
->;
+> & {
+  /** "open": every player may race any car with all upgrades, without touching saves. */
+  garage: "own" | "open";
+};
 type Message =
   | { t: "hello"; v: number; name: string; car: string; visual: Visual }
   | { t: "roster"; players: LobbyPlayer[]; config: NetConfig; you: string }
@@ -155,6 +158,7 @@ export function cleanConfig(raw: unknown, fallback: NetConfig): NetConfig {
     weather: ["clear", "rain", "fog", "snow"].includes(c.weather ?? "")
       ? c.weather!
       : "clear",
+    garage: c.garage === "open" ? "open" : "own",
   };
 }
 export interface SessionProfile {
@@ -175,6 +179,7 @@ export class NetSession {
     laps: 3,
     reverse: false,
     weather: "clear",
+    garage: "own",
   };
   inRace = false;
   localRoom = "";
@@ -208,7 +213,7 @@ export class NetSession {
       this.pingTimer = window.setInterval(() => this.pingAll(), 2000);
     }
   }
-  static host(profile: SessionProfile, config?: NetConfig) {
+  static host(profile: SessionProfile, config?: Partial<NetConfig>) {
     const s = new NetSession("host", profile);
     if (config) s.config = cleanConfig(config, s.config);
     return s;

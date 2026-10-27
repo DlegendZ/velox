@@ -50,6 +50,7 @@ test("network input is sanitised: config, names and liveries", () => {
     laps: 3,
     reverse: false,
     weather: "clear",
+    garage: "own" as const,
   };
   assert.deepEqual(
     cleanConfig(
@@ -59,6 +60,7 @@ test("network input is sanitised: config, names and liveries", () => {
         laps: 99,
         reverse: "yes",
         weather: "lava",
+        garage: "everything",
       },
       fallback,
     ),
@@ -68,8 +70,10 @@ test("network input is sanitised: config, names and liveries", () => {
       laps: 5,
       reverse: false,
       weather: "clear",
+      garage: "own",
     },
   );
+  assert.equal(cleanConfig({ garage: "open" }, fallback).garage, "open");
   assert.equal(
     cleanConfig(
       { mode: "roam", track: "coast_c", laps: 2, weather: "snow" },

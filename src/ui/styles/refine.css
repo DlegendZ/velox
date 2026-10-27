@@ -2144,3 +2144,13 @@ body.input-keys #app .mode-tab:focus:not(.selected) {
     overflow: visible;
   }
 }
+
+/* 0.9.4 open-garage online rooms */
+#app .open-garage-note {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--cool);
+  background: rgba(79, 216, 255, 0.08);
+  font-size: 14px;
+  color: var(--text-2);
+}

@@ -26,10 +26,10 @@ import { Renderer } from "../render/Renderer";
 import { CameraRig } from "../render/CameraRig";
 import { Loop } from "./Loop";
 import { Input } from "./Input";
-import { Save, cleanName } from "./Save";
+import { Save, cleanName, lentCar, type OwnedCar } from "./Save";
 import { StateMachine, type State } from "./StateMachine";
 import { AudioManager, type SpatialSource } from "../audio/AudioManager";
-import { carById, UPGRADES, type Upgrade } from "../data/cars";
+import { CARS, carById, UPGRADES, type Upgrade } from "../data/cars";
 import { TRACKS, MODES, type RaceMode } from "../data/tracks";
 import { CAREER_EVENTS } from "../data/careerEvents";
 import {
@@ -411,8 +411,9 @@ export class Game {
         4000,
       );
       this.armedCar = null;
-      this.previewCar = this.save.data.garage.activeCar;
-      this.renderer.showCar(carById(this.previewCar), this.save.active.visual);
+      const ride = this.raceCar();
+      this.previewCar = ride.id;
+      this.renderer.showCar(carById(ride.id), ride.owned.visual);
     }
     if (state === "settings" && previous !== "settings")
       this.settingsReturn = previous === "pause" ? "pause" : "menu";
@@ -640,11 +641,27 @@ export class Game {
     };
     requestAnimationFrame(step);
   }
+  /** Car picked in the garage while an open-garage online room is active. */
+  onlineCar: string | null = null;
+  /** The host lends every car fully upgraded to everyone in this room. */
+  get openGarage() {
+    return this.net?.config.garage === "open";
+  }
+  /** The car (and its upgrades) this player races with right now. */
+  raceCar(): { id: string; owned: OwnedCar } {
+    const garage = this.save.data.garage;
+    if (!this.openGarage) return { id: garage.activeCar, owned: this.save.active };
+    const id = CARS.some((c) => c.id === this.onlineCar)
+      ? this.onlineCar!
+      : garage.activeCar;
+    return { id, owned: lentCar(id, garage.owned[id]) };
+  }
   private sessionProfile() {
+    const car = this.raceCar();
     return {
       name: this.save.data.profile.name,
-      car: this.save.data.garage.activeCar,
-      visual: this.save.active.visual,
+      car: car.id,
+      visual: car.owned.visual,
     };
   }
   private profileChanged() {
@@ -846,11 +863,9 @@ export class Game {
       this.armedCar = null;
       this.garageTab = a.slice(4);
       if (["visual", "performance"].includes(this.garageTab)) {
-        this.previewCar = this.save.data.garage.activeCar;
-        this.renderer.showCar(
-          carById(this.previewCar),
-          this.save.active.visual,
-        );
+        const ride = this.raceCar();
+        this.previewCar = ride.id;
+        this.renderer.showCar(carById(ride.id), ride.owned.visual);
       }
       this.screen();
       return;
@@ -908,6 +923,17 @@ export class Game {
       if (fromCard) selected?.focus({ preventScroll: true });
       if (selected) revealControl(selected);
       this.updateGarageArrows();
+      return;
+    }
+    if (a.startsWith("online-car-")) {
+      const id = a.slice(11);
+      if (this.openGarage && CARS.some((c) => c.id === id)) {
+        this.onlineCar = id;
+        this.audio.sfx("buy");
+        this.toast(`${carById(id).name} is your ride for this room.`, "online");
+        this.profileChanged();
+        this.screen();
+      }
       return;
     }
     if (a.startsWith("activate-")) {
@@ -1059,6 +1085,8 @@ export class Game {
       const patch: Partial<NetConfig> = {};
       if (el.id === "net-mode") patch.mode = el.value as RaceMode;
       if (el.id === "net-track") patch.track = el.value;
+      if (el.id === "net-garage")
+        patch.garage = el.value === "open" ? "open" : "own";
       if (el.id === "laps") patch.laps = Number(el.value);
       if (el.id === "direction") patch.reverse = el.value === "reverse";
       if (el.id === "weather") patch.weather = el.value;
@@ -1451,7 +1479,12 @@ export class Game {
           remotes: this.netGrid.filter((p) => p.id !== this.net!.selfId),
         };
       }
-      this.race = new RaceManager(config, this.save, netRace);
+      this.race = new RaceManager(
+        config,
+        this.save,
+        netRace,
+        this.net ? this.raceCar() : undefined,
+      );
       this.showLoading(0.65, "Compiling shaders", 0.95);
       await new Promise((r) => setTimeout(r, 20));
       this.renderer.world.add(this.race.root);
@@ -2122,11 +2155,17 @@ export class Game {
         n.roomCode,
         n.roomError,
       ]);
-    let previousRoster = roster();
+    let previousRoster = roster(),
+      sentCar = this.raceCar().id;
     n.onChange = () => {
       const next = roster(),
         changed = next !== previousRoster;
       previousRoster = next;
+      // Opening or closing the garage switches which car this player races.
+      if (this.net === n && this.raceCar().id !== sentCar) {
+        sentCar = this.raceCar().id;
+        n.updateProfile(this.sessionProfile());
+      }
       if (this.machine.current === "lobby") {
         // Ping-only updates must not detach a button between pointer down and up.
         if (changed) this.screen();

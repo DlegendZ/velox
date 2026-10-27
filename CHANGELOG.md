@@ -1,5 +1,9 @@
 # VELOX changelog
 
+## 0.9.4 — Open garage for online rooms
+
+- The host can set GARAGE to ALL MAXED in the meet-up. Everyone in the room may then pick any car in the garage (RACE THIS ONLINE) and races it with every upgrade at level 5. Owned cars keep their paint; nothing is bought and saves and credits are not changed. Switching back to OWN CARS returns each player to their own active car.
+
 ## 0.9.3 — Slow loaders start their race
 
 - Online: a player whose race takes longer to load than the host waits (first shader compile on a slower PC) used to miss the start signal and sit on the grid forever. They now start as soon as their race is ready, and the host waits up to 20 seconds instead of 12.
