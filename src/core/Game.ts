@@ -333,9 +333,12 @@ export class Game {
       if (this.machine.current === "race") this.machine.go("pause");
       this.toast("Graphics context interrupted. Waiting for browser recovery.");
     });
-    canvas.addEventListener("webglcontextrestored", () => location.reload());
+    canvas.addEventListener("webglcontextrestored", () => {
+      this.net?.close("Graphics driver reset; the game reloaded.");
+      location.reload();
+    });
     window.addEventListener("beforeunload", () => {
-      this.net?.close();
+      this.net?.close("Closed or reloaded the game.");
       this.save.persist();
     });
     this.loop = new Loop(
@@ -1462,7 +1465,8 @@ export class Game {
       this.showLoading(1, "Lights out and away we go");
       await new Promise((r) => setTimeout(r, 380));
       if (this.net) {
-        this.race.waiting = true;
+        // A slow loader may already have missed "go"; then it starts right away.
+        this.race.waiting = !this.net.started;
         this.net.markLoaded();
       }
       this.hintRace = ++this.save.data.settings.hintRaces;
@@ -2151,9 +2155,9 @@ export class Game {
         "online",
       );
     };
-    n.onPlayerLeft = (name, id) => {
+    n.onPlayerLeft = (name, id, reason) => {
       this.audio.sfx("leave");
-      this.toast(`${name} left.`, "online");
+      this.toast(reason ? `${name} left: ${reason}` : `${name} left.`, "online");
       this.race?.removeRemote(id);
     };
     n.onChat = (name, text) => {

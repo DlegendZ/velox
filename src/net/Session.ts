@@ -41,7 +41,7 @@ type Message =
   | { t: "finish"; id?: string; time: number; best: number | null }
   | { t: "chat"; id?: string; text: string }
   | { t: "lobby" }
-  | { t: "leave"; id?: string }
+  | { t: "leave"; id?: string; reason?: string }
   | { t: "retire"; id?: string }
   | { t: "kick"; reason: string }
   | { t: "ping"; ts: number }
@@ -184,7 +184,7 @@ export class NetSession {
   onGo = () => {};
   onState = (_id: string, _s: Snapshot) => {};
   onFinish = (_id: string, _time: number, _best: number | null) => {};
-  onPlayerLeft = (_name: string, _id: string) => {};
+  onPlayerLeft = (_name: string, _id: string, _reason?: string) => {};
   onPlayerJoined = (_name: string) => {};
   /** Host: a room-code guest dropped and their spot is held (away) or they came back. */
   onPlayerAway = (_name: string, _away: boolean) => {};
@@ -478,7 +478,7 @@ export class NetSession {
     }
     this.removePlayer(peer);
   }
-  private removePlayer(peer: string) {
+  private removePlayer(peer: string, reason = "") {
     clearTimeout(this.away.get(peer));
     this.away.delete(peer);
     this.outbox.delete(peer);
@@ -487,7 +487,7 @@ export class NetSession {
     if (p) {
       this.broadcast({ t: "leave", id: peer });
       this.broadcastRoster();
-      this.onPlayerLeft(p.name, peer);
+      this.onPlayerLeft(p.name, peer, reason);
       this.onChange();
       if (this.inRace) this.checkAllLoaded();
     }
@@ -632,7 +632,10 @@ export class NetSession {
         const link = this.links.get(peer);
         this.links.delete(peer);
         link?.close();
-        this.removePlayer(peer);
+        this.removePlayer(
+          peer,
+          typeof msg.reason === "string" ? msg.reason.slice(0, 80) : "",
+        );
         return;
       }
     }
@@ -655,10 +658,12 @@ export class NetSession {
         this.config = cleanConfig(msg.config, this.config);
         const grid = this.cleanGrid(msg.grid);
         this.inRace = true;
+        this.released = false;
         this.onStart(this.config, grid);
         return;
       }
       case "go":
+        this.released = true;
         this.onGo();
         return;
       case "s":
@@ -781,8 +786,8 @@ export class NetSession {
     }));
     this.broadcast({ t: "start", config: this.config, grid });
     this.onStart(this.config, grid);
-    // Never wait forever on a slow loader.
-    setTimeout(() => this.release(), 12000);
+    // Never wait forever on a slow loader; it starts as soon as it is ready.
+    setTimeout(() => this.release(), 20000);
   }
   /** Local race finished loading. */
   markLoaded() {
@@ -792,6 +797,10 @@ export class NetSession {
     } else this.send({ t: "loaded" });
   }
   private released = false;
+  /** The host has sent "go" for the current race (it can arrive before we finish loading). */
+  get started() {
+    return this.released;
+  }
   private checkAllLoaded() {
     if (this.players.every((p) => this.loaded.has(p.id))) this.release();
   }
@@ -835,7 +844,7 @@ export class NetSession {
     for (const timer of this.away.values()) clearTimeout(timer);
     this.away.clear();
     try {
-      this.send({ t: "leave" });
+      this.send(this.isHost ? { t: "leave" } : { t: "leave", reason });
     } catch {
       /* Peer already gone. */
     }

@@ -36,10 +36,19 @@ await twoPlayers();
 await host.evaluate(() => window.__velox.net.setConfig({ track: "neon_gp", laps: 3, mode: "race" }));
 await guest.evaluate(() => window.__velox.net.setReady(true));
 await host.waitForFunction(() => window.__velox.net.canStart);
+// The guest loads slower than the host is willing to wait, so "go" arrives first.
+await guest.evaluate(() => {
+  const r = window.__velox.renderer,
+    precompile = r.precompile.bind(r);
+  r.precompile = async () => {
+    await new Promise((done) => setTimeout(done, 23000));
+    return precompile();
+  };
+});
 await host.evaluate(() => window.__velox.net.start());
 for (const p of [host, guest]) {
   await p.waitForFunction(() => window.__velox.machine.current === "race", null, { timeout: 60000 });
-  await p.waitForFunction(() => !window.__velox.race.waiting, null, { timeout: 60000 });
+  await p.waitForFunction(() => window.__velox.race && !window.__velox.race.waiting, null, { timeout: 60000 });
 }
 const step = (p, keys = false) =>
   p.evaluate((drive) => {

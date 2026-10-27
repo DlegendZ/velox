@@ -179,7 +179,7 @@ export class Screens {
   }
   menu(title: boolean) {
     if (title)
-      return '<main class="title-screen"><h1>VELOX</h1><p>AFTER HOURS MOTOR CLUB</p><button data-action="enter" data-autofocus>PRESS ANY KEY</button><span class="version">0.9.2 / ORIGINAL MACHINES</span></main>';
+      return '<main class="title-screen"><h1>VELOX</h1><p>AFTER HOURS MOTOR CLUB</p><button data-action="enter" data-autofocus>PRESS ANY KEY</button><span class="version">0.9.3 / ORIGINAL MACHINES</span></main>';
     const g = this.g,
       c = carById(g.save.data.garage.activeCar),
       d = dailyChallenge(),

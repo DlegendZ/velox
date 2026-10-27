@@ -1,5 +1,10 @@
 # VELOX changelog
 
+## 0.9.3 — Slow loaders start their race
+
+- Online: a player whose race takes longer to load than the host waits (first shader compile on a slower PC) used to miss the start signal and sit on the grid forever. They now start as soon as their race is ready, and the host waits up to 20 seconds instead of 12.
+- When a player leaves, the host's notice says why (lost connection, closed or reloaded the game, graphics driver reset).
+
 ## 0.9.2 — Steadier online races
 
 - A room-code player whose connection drops mid-race (a Wi-Fi blip or the router changing ports) reconnects automatically. The guest redials the host through the room server for up to 30 seconds while the host holds their slot and car, so the race carries on. Both sides see a toast: "Reconnecting…", "Holding their spot…", "Reconnected".
